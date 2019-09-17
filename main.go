@@ -1,5 +1,10 @@
 package main
 
-import "github.com/gin-gonic/gin"
-import "net/http"
+import (
+	"github.com/subosito/gotenv"
+)
+
+func init() {
+	gotenv.Load()
+}
 

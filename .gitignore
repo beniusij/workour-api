@@ -3,3 +3,6 @@
 
 # Vendor packages and dependencies
 vendor/
+
+# Sensitive files
+.env
