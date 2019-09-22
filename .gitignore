@@ -6,3 +6,4 @@ vendor/
 
 # Sensitive files
 .env
+docker/data/

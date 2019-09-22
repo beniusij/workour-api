@@ -1,16 +1,29 @@
 package main
 
 import (
-	//"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin"
 	"github.com/subosito/gotenv"
+	"net/http"
 )
 
 func init() {
 	// Load .env variables
-	gotenv.Load()
+	_ = gotenv.Load()
+}
 
-	// Initialise connection with database
+func setupRouter() *gin.Engine {
+	r := gin.Default()
 
-	//router = gin.New()
+	// Ping test
+	r.GET("/ping", func(c *gin.Context) {
+		c.String(http.StatusOK, "pong")
+	})
+
+	return r
+}
+
+func main() {
+	r := setupRouter()
+	r.Run(":8080")
 }
 
