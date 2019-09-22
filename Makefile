@@ -6,6 +6,7 @@ include .env
 
 create-db:
 	@docker create --name workour_db \
+	-p 5432:${DATABASE_PORT} \
 	-v ${PWD}/docker/data:/var/lib/postgresql/data \
 	-e POSTGRES_USER=${DATABASE_USER} \
 	-e POSTGRES_PASSWORD=${DATABASE_PSW} \
