@@ -2,9 +2,9 @@ include .env
 
 .EXPORT_ALL_VARIABLES:
 
-.PHONY: create-db
+.PHONY: create start stop
 
-create-db:
+create:
 	@docker create --name workour_db \
 	-p 5432:${DATABASE_PORT} \
 	-v ${PWD}/docker/data:/var/lib/postgresql/data \
@@ -13,3 +13,9 @@ create-db:
 	-e POSTGRES_DB=${DATABASE_NAME} \
 	postgres
 	@docker start workour_db
+
+start:
+	@docker start workour_db
+
+stop:
+	@docker stop workour_db
