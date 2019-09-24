@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
+	m "workour-api/models"
 )
 
 func initDb(driver, creds string) *gorm.DB {
@@ -16,6 +17,7 @@ func initDb(driver, creds string) *gorm.DB {
 	defer db.Close()
 
 	// Migrate
+	db.AutoMigrate(m.User{})
 	return db
 }
 
