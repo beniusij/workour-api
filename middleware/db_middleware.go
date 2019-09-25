@@ -25,7 +25,7 @@ func DBMiddleware(driver, creds string) gin.HandlerFunc {
 	db := initDb(driver, creds)
 
 	return func(c *gin.Context) {
-		c.Set("DB", db)
+		c.Set("db", db)
 		c.Next()
 	}
 }

@@ -2,11 +2,9 @@ package main
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"github.com/subosito/gotenv"
-	"net/http"
+	"workour-api/config"
 	"os"
-	"workour-api/middleware"
 )
 
 func init() {
@@ -16,18 +14,6 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-}
-
-func setupRouter(driver, creds string) *gin.Engine {
-	r := gin.Default()
-	r.Use(middleware.DBMiddleware(driver, creds))
-
-	// Ping test
-	r.GET("/ping", func(c *gin.Context) {
-		c.String(http.StatusOK, "pong")
-	})
-
-	return r
 }
 
 func main() {
@@ -44,7 +30,7 @@ func main() {
 	creds := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s",
 		dbHost, dbPort, dbUser, dbName, dbPsw, dbSSL)
 
-	r := setupRouter(driver, creds)
+	r := config.SetupRouter(driver, creds)
 	r.Run(":8080")
 }
 
