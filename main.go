@@ -1,9 +1,10 @@
 package main
 
 import (
-	"fmt"
+	"github.com/jinzhu/gorm"
 	"github.com/subosito/gotenv"
-	"os"
+	m "workour-api/middleware"
+	u "workour-api/users"
 )
 
 func init() {
@@ -15,21 +16,16 @@ func init() {
 	}
 }
 
+func Migrate(db *gorm.DB) {
+	db.AutoMigrate(&u.User{})
+}
+
 func main() {
-	var (
-		driver = "postgres"
-		dbUser = os.Getenv("DATABASE_USER")
-		dbPsw = os.Getenv("DATABASE_PSW")
-		dbHost = os.Getenv("DATABASE_HOST")
-		dbPort = os.Getenv("DATABASE_PORT")
-		dbName = os.Getenv("DATABASE_NAME")
-		dbSSL = os.Getenv("DATABASE_SSL")
-	)
+	db := m.InitDb()
+	Migrate(db)
+	defer db.Close()
 
-	creds := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s",
-		dbHost, dbPort, dbUser, dbName, dbPsw, dbSSL)
-
-	r := SetupRouter(driver, creds)
+	r := SetupRouter()
 	r.Run(":8080")
 }
 

@@ -1,10 +1,10 @@
 package middleware
 
 import (
-	"github.com/gin-gonic/gin"
+	"fmt"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
-	"workour-api/users"
+	"os"
 )
 
 type Database struct {
@@ -13,7 +13,20 @@ type Database struct {
 
 var DB *gorm.DB
 
-func initDb(driver, creds string) *gorm.DB {
+func InitDb() *gorm.DB {
+	var (
+		driver = "postgres"
+		dbUser = os.Getenv("DATABASE_USER")
+		dbPsw = os.Getenv("DATABASE_PSW")
+		dbHost = os.Getenv("DATABASE_HOST")
+		dbPort = os.Getenv("DATABASE_PORT")
+		dbName = os.Getenv("DATABASE_NAME")
+		dbSSL = os.Getenv("DATABASE_SSL")
+	)
+
+	creds := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s",
+		dbHost, dbPort, dbUser, dbName, dbPsw, dbSSL)
+
 	db, err := gorm.Open(driver, creds)
 
 	if err != nil {
@@ -22,20 +35,8 @@ func initDb(driver, creds string) *gorm.DB {
 
 	db.DB().SetMaxIdleConns(10)
 
-	// Migrate
-	db.AutoMigrate(users.User{})
-
 	DB = db
 	return db
-}
-
-func DBMiddleware(driver, creds string) gin.HandlerFunc {
-	db := initDb(driver, creds)
-
-	return func(c *gin.Context) {
-		c.Set("DB", db)
-		c.Next()
-	}
 }
 
 func GetDB() *gorm.DB {
