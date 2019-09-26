@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"github.com/subosito/gotenv"
-	"workour-api/config"
 	"os"
 )
 
@@ -30,7 +29,7 @@ func main() {
 	creds := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s",
 		dbHost, dbPort, dbUser, dbName, dbPsw, dbSSL)
 
-	r := config.SetupRouter(driver, creds)
+	r := SetupRouter(driver, creds)
 	r.Run(":8080")
 }
 

@@ -1,10 +1,11 @@
-package models
+package users
 
 import (
 	//"errors"
 	"errors"
 	"github.com/jinzhu/gorm"
 	"golang.org/x/crypto/bcrypt"
+	"workour-api/middleware"
 )
 
 type User struct {
@@ -15,10 +16,11 @@ type User struct {
 	PasswordHash	string	`gorm:"column:password;not null"`
 }
 
-//func (u *User) New(data interface{}) (bool) {
-//	//db, _ := c.Context{}.Get("db")
-//	//user := User{}
-//}
+func SaveUser(data interface{}) error {
+	db := middleware.GetDB()
+	err := db.Save(data).Error
+	return err
+}
 
 func (u *User) SetPassword(password string) error {
 	if len(password) == 0 {

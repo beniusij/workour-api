@@ -1,10 +1,9 @@
-package validators
+package users
 
 import (
 	"errors"
 	"github.com/gin-gonic/gin"
 	"workour-api/helpers"
-	"workour-api/models"
 )
 
 type UserModelValidator struct {
@@ -13,9 +12,9 @@ type UserModelValidator struct {
 		FirstName		string `form:"first_name" json:"first_name" binding:"exists,min=2"`
 		LastName		string `form:"last_name" json:"last_name" binding:"exists,min=2"`
 		Password		string `form:"password" json:"password" binding:"exists,min=2,max=255"`
-		PasswordConfirm	string `form:"password" json:"password" binding:"exists,min=2,max=255"`
+		PasswordConfirm	string `form:"password_confirm" json:"password_confirm" binding:"exists,min=2,max=255"`
 	} `json:"user"`
-	user models.User `json:"-"`
+	user User `json:"-"`
 }
 
 func NewUserModelValidator() UserModelValidator {

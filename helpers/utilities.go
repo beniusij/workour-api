@@ -16,6 +16,13 @@ func Bind(c *gin.Context, obj interface{}) error {
 	return c.ShouldBindWith(obj, b)
 }
 
+func NewError(key string, err error) CommonError {
+	res := CommonError{}
+	res.Errors = make(map[string]interface{})
+	res.Errors[key] = err.Error()
+	return res
+}
+
 func NewValidationError(err error) CommonError {
 	res := CommonError{}
 	res.Errors = make(map[string]interface{})

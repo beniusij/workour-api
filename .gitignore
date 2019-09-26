@@ -7,3 +7,6 @@ vendor/
 # Sensitive files
 .env
 docker/data/
+
+# Built executable
+/workour-api
