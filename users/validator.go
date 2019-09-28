@@ -3,7 +3,7 @@ package users
 import (
 	"errors"
 	"github.com/gin-gonic/gin"
-	"workour-api/helpers"
+	"workour-api/common"
 )
 
 type UserModelValidator struct {
@@ -22,7 +22,7 @@ func NewUserModelValidator() UserModelValidator {
 }
 
 func (u *UserModelValidator) Bind(c *gin.Context) error {
-	err := helpers.Bind(c, u)
+	err := common.Bind(c, u)
 	if err != nil {
 		return err
 	}

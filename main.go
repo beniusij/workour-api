@@ -3,7 +3,8 @@ package main
 import (
 	"github.com/jinzhu/gorm"
 	"github.com/subosito/gotenv"
-	m "workour-api/middleware"
+	"workour-api/common"
+	c "workour-api/config"
 	u "workour-api/users"
 )
 
@@ -21,11 +22,11 @@ func Migrate(db *gorm.DB) {
 }
 
 func main() {
-	db := m.InitDb()
+	db := common.InitDb()
 	Migrate(db)
 	defer db.Close()
 
-	r := SetupRouter()
+	r := c.SetupRouter()
 	r.Run(":8080")
 }
 
