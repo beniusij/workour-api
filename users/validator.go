@@ -14,11 +14,12 @@ type UserModelValidator struct {
 		Password		string `form:"password" json:"password" binding:"exists,min=2,max=255"`
 		PasswordConfirm	string `form:"password_confirm" json:"password_confirm" binding:"exists,min=2,max=255"`
 	} `json:"user"`
-	user User `json:"-"`
+	userModel User `json:"-"`
 }
 
 func NewUserModelValidator() UserModelValidator {
-	return UserModelValidator{}
+	userModelValidator := UserModelValidator{}
+	return userModelValidator
 }
 
 func (u *UserModelValidator) Bind(c *gin.Context) error {
@@ -27,15 +28,15 @@ func (u *UserModelValidator) Bind(c *gin.Context) error {
 		return err
 	}
 
-	u.user.Email = u.User.Email
-	u.user.FirstName = u.User.FirstName
-	u.user.LastName = u.User.LastName
+	u.userModel.Email = u.User.Email
+	u.userModel.FirstName = u.User.FirstName
+	u.userModel.LastName = u.User.LastName
 
 	if u.User.Password != u.User.PasswordConfirm {
 		return errors.New("invalid password, minimum length is 8 chars")
 	}
 
-	_ = u.user.SetPassword(u.User.Password)
+	_ = u.userModel.SetPassword(u.User.Password)
 
 	return nil
 }

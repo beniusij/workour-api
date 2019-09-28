@@ -16,6 +16,12 @@ type User struct {
 	PasswordHash	string	`gorm:"column:password;not null"`
 }
 
+func AutoMigrate() {
+	db := common.GetDB()
+
+	db.AutoMigrate(&User{})
+}
+
 func SaveUser(data interface{}) error {
 	db := common.GetDB()
 	err := db.Save(data).Error

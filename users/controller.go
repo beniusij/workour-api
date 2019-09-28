@@ -7,7 +7,7 @@ import (
 )
 
 func CreateUser(c *gin.Context) {
-	modelValidator := UserModelValidator{}
+	modelValidator := NewUserModelValidator()
 	err := modelValidator.Bind(c)
 	if err != nil {
 		c.JSON(http.StatusUnprocessableEntity, common.NewValidationError(err))
