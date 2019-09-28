@@ -6,14 +6,16 @@ import (
 )
 
 func UserRoutes(router *gin.RouterGroup) {
-	router.POST("/create", CreateUser)
-	router.GET("/:id", func(c *gin.Context) {
+	r := router.Group("/user")
+
+	r.POST("/create", CreateUser)
+	r.GET("/:id", func(c *gin.Context) {
 		c.JSON(http.StatusOK, "{'action': 'read'}")
 	})
-	router.PUT("/:id", func(c *gin.Context) {
+	r.PUT("/:id", func(c *gin.Context) {
 		c.JSON(http.StatusOK, "{'action': 'update}")
 	})
-	router.DELETE("/:id", func(c *gin.Context) {
+	r.DELETE("/:id", func(c *gin.Context) {
 		c.JSON(http.StatusOK, "{'action': 'delete'}")
 	})
 }

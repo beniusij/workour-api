@@ -9,7 +9,7 @@ func SetupRouter() *gin.Engine {
 	r := gin.Default()
 
 	v1 := r.Group("/v1")
-	u.UserRoutes(v1.Group("/user"))
+	u.UserRoutes(v1)
 
 	return r
 }
