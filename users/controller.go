@@ -11,13 +11,15 @@ func CreateUser(c *gin.Context) {
 	err := modelValidator.Bind(c)
 	if err != nil {
 		c.JSON(http.StatusUnprocessableEntity, common.NewValidationError(err))
+		return
 	}
 
-	err = SaveUser(&modelValidator.user)
+	err = SaveUser(&modelValidator.userModel)
 	if err != nil {
 		c.JSON(http.StatusUnprocessableEntity, common.NewError("database", err))
 		return
 	}
-
-
+	c.Set("my_user_model", modelValidator.userModel)
+	serializer := UserSerializer{c}
+	c.JSON(http.StatusCreated, gin.H{"user": serializer.Response()})
 }
