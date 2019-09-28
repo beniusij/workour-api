@@ -13,7 +13,7 @@ type Database struct {
 }
 
 var DB *gorm.DB
-var testDbPath string = "./../gorm_test.db"
+var testDbPath = "./../gorm_test.db"
 
 func InitDb() *gorm.DB {
 	var (
@@ -32,13 +32,13 @@ func InitDb() *gorm.DB {
 	db, err := gorm.Open(driver, creds)
 
 	if err != nil {
-		panic(err)
+		fmt.Println()
 	}
 
 	db.DB().SetMaxIdleConns(10)
 
 	DB = db
-	return db
+	return DB
 }
 
 func GetDB() *gorm.DB {
@@ -48,12 +48,12 @@ func GetDB() *gorm.DB {
 func InitTestDb() * gorm.DB {
 	testDb, err := gorm.Open("sqlite3", testDbPath)
 	if err != nil {
-		panic(err)
+		fmt.Println("db err: ", err)
 	}
 
 	testDb.DB().SetMaxIdleConns(3)
 	testDb.LogMode(true)
-
+	DB = testDb
 	return testDb
 }
 
