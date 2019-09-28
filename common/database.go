@@ -1,9 +1,10 @@
-package middleware
+package helpers
 
 import (
 	"fmt"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
+	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"os"
 )
 
@@ -12,6 +13,7 @@ type Database struct {
 }
 
 var DB *gorm.DB
+var testDbPath string = "./../gorm_test.db"
 
 func InitDb() *gorm.DB {
 	var (
@@ -41,4 +43,22 @@ func InitDb() *gorm.DB {
 
 func GetDB() *gorm.DB {
 	return DB
+}
+
+func InitTestDb() * gorm.DB {
+	testDb, err := gorm.Open("sqlite3", testDbPath)
+	if err != nil {
+		panic(err)
+	}
+
+	testDb.DB().SetMaxIdleConns(3)
+	testDb.LogMode(true)
+
+	return testDb
+}
+
+func ResetTestDb(db *gorm.DB) error {
+	db.Close()
+	err := os.Remove(testDbPath)
+	return err
 }
