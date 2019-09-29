@@ -9,7 +9,7 @@ import (
 )
 
 type Database struct {
-	*gorm.DB
+	db *gorm.DB
 }
 
 var DB *gorm.DB
