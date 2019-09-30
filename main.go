@@ -7,7 +7,6 @@ import (
 	"github.com/jinzhu/gorm"
 	"github.com/subosito/gotenv"
 	comm "workour-api/common"
-	c "workour-api/config"
 	g "workour-api/gql"
 	u "workour-api/users"
 )
@@ -27,6 +26,7 @@ func Migrate(db *gorm.DB) {
 
 func main() {
 	r, db := initAPI()
+	Migrate(db)
 	defer db.Close()
 
 	r.Run(":8080")
@@ -34,9 +34,7 @@ func main() {
 
 func initAPI() (*gin.Engine, *gorm.DB) {
 	db := comm.InitDb()
-	Migrate(db)
-
-	router := c.SetupRouter()
+	router := gin.Default()
 
 	rootQuery := g.NewRoot(db)
 	// Create a new graphql schema, passing in the root query
@@ -47,7 +45,7 @@ func initAPI() (*gin.Engine, *gorm.DB) {
 		fmt.Println("error creating schema: ", err)
 	}
 
-
+	router.POST("/graphql", g.GraphQL(schema))
 
 	return router, db
 }

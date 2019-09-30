@@ -1,6 +1,7 @@
 package gql
 
 import (
+	"fmt"
 	g "github.com/graphql-go/graphql"
 	"github.com/jinzhu/gorm"
 )
@@ -37,4 +38,19 @@ func NewRoot(db *gorm.DB) *Root {
 	}
 
 	return &root
+}
+
+// This one runs our graphql queries
+func ExecuteQuery(query string, schema g.Schema) *g.Result {
+	result := g.Do(g.Params{
+		Schema:			schema,
+		RequestString:	query,
+	})
+
+	// Error check
+	if len(result.Errors) > 0 {
+		fmt.Printf("Unexpected errors inside ExecuteQuery: %v", result.Errors)
+	}
+
+	return result
 }
