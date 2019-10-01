@@ -14,7 +14,8 @@ type Resolver struct {
 // UserResolver resolves our user query through a db call to GetUserById
 func (r *Resolver) UserResolver(p g.ResolveParams) (interface{}, error) {
 	// Strip the name from arguments and assert that it is an int
-	id, ok := p.Args["id"].(uint)
+	id, ok := p.Args["id"].(int)
+
 	if ok {
 		user, err := u.GetUserById(id)
 		return user, err

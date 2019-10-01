@@ -24,7 +24,7 @@ func NewRoot(db *gorm.DB) *Root {
 				Fields:      g.Fields{
 					"user": &g.Field{
 						// Slice of User type which can be found in types.go
-						Type: g.NewList(User),
+						Type: User,
 						Args: g.FieldConfigArgument{
 							"id": &g.ArgumentConfig{
 								Type:         g.Int,

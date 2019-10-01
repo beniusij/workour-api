@@ -3,12 +3,13 @@ package users
 import (
 	//"errors"
 	"errors"
+	"fmt"
 	"golang.org/x/crypto/bcrypt"
 	"workour-api/common"
 )
 
 type User struct {
-	ID				uint	`gorm:"primary_key"`
+	ID				int		`gorm:"primary_key"`
 	Email			string	`gorm:"column:email;type:varchar(100);unique_index"`
 	FirstName		string	`gorm:"column:first_name"`
 	LastName		string	`gorm:"column:last_name"`
@@ -49,9 +50,14 @@ func (u *User) CheckPassword(password string) error {
 	return bcrypt.CompareHashAndPassword(hashedPassword, bytePassword)
 }
 
-func GetUserById(id uint) (User, error) {
+func GetUserById(id int) (User, error) {
 	db := common.GetDB()
 	var model User
 	err := db.Where(&User{ID: id}).First(&model).Error
+
+	if err != nil {
+		fmt.Printf("an error occurred while fetching user: %v", err)
+	}
+
 	return model, err
 }
