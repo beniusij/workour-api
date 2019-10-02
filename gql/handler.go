@@ -28,7 +28,12 @@ func GraphQL(sc graphql.Schema) gin.HandlerFunc {
 		}
 
 		// Execute graphql query
-		result := ExecuteQuery(rBody.Query, sc)
+		result, errs := ExecuteQuery(rBody.Query, sc)
+
+		if len(errs) > 0 {
+			c.JSON(http.StatusBadRequest, result)
+			return
+		}
 
 		// render.JSON comes from the chi/render package and handles
 		// marshalling to json, automatically escaping HTML and setting
