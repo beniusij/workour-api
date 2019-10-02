@@ -8,6 +8,7 @@ import (
 
 type Root struct {
 	Query *g.Object
+	Mutation *g.Object
 }
 
 var queryType = g.NewObject(
@@ -21,8 +22,38 @@ var queryType = g.NewObject(
 						Type: g.Int,
 					},
 				},
-				Resolve:     u.UserResolver(),
+				Resolve:     u.GetUserResolver(),
 				Description: "Get user by id",
+			},
+		},
+	},
+)
+
+var mutationType = g.NewObject(
+	g.ObjectConfig{
+		Name: "Mutation",
+		Fields: g.Fields{
+			"user": &g.Field{
+				Type: u.UserRegisterType,
+				Args: g.FieldConfigArgument{
+					"email": &g.ArgumentConfig{
+						Type: g.NewNonNull(g.String),
+					},
+					"first_name": &g.ArgumentConfig{
+						Type: g.NewNonNull(g.String),
+					},
+					"last_name": &g.ArgumentConfig{
+						Type: g.NewNonNull(g.String),
+					},
+					"password": &g.ArgumentConfig{
+						Type: g.NewNonNull(g.String),
+					},
+					"password_confirm": &g.ArgumentConfig{
+						Type: g.NewNonNull(g.String),
+					},
+				},
+				Resolve: u.CreateUserResolver(),
+				Description: "Create a news user",
 			},
 		},
 	},
@@ -34,6 +65,7 @@ func NewRoot() *Root {
 	// example we have a user query that takes one argument called ID
 	root := Root{
 		Query: queryType,
+		Mutation: mutationType,
 	}
 
 	return &root

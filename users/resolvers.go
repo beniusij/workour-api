@@ -1,12 +1,19 @@
 package users
 
 import (
-	"github.com/graphql-go/graphql"
+	g "github.com/graphql-go/graphql"
 )
 
-// UserResolver resolves our user query through a db call to GetUserById
-func UserResolver() func(p graphql.ResolveParams) (interface{}, error) {
-	return func(p graphql.ResolveParams) (interface{}, error) {
+// Handles mutation to create a user
+func CreateUserResolver() func(p g.ResolveParams) (interface{}, error) {
+	return func(p g.ResolveParams) (interface{}, error) {
+		return nil, nil
+	}
+}
+
+// GetUserResolver resolves our user query through a db call to GetUserById
+func GetUserResolver() func(p g.ResolveParams) (interface{}, error) {
+	return func(p g.ResolveParams) (interface{}, error) {
 	// Strip the name from arguments and assert that it is an int
 	id, ok := p.Args["id"].(int)
 

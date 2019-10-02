@@ -36,6 +36,32 @@ var UserType = g.NewObject(
 	},
 )
 
+var UserRegisterType = g.NewObject(
+	g.ObjectConfig{
+		Name:        "UserRegister",
+		Fields:      g.Fields{
+			"ID": &g.Field{
+				Type: g.Int,
+			},
+			"Email": &g.Field{
+				Type: g.String,
+			},
+			"FirstName": &g.Field{
+				Type: g.String,
+			},
+			"LastName": &g.Field{
+				Type: g.String,
+			},
+			"Password": &g.Field{
+				Type: g.String,
+			},
+			"PasswordConfirm": &g.Field{
+				Type: g.String,
+			},
+		},
+	},
+)
+
 func AutoMigrate() {
 	db := common.GetDB()
 

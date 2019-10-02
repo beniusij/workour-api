@@ -41,6 +41,7 @@ func initAPI() (*gin.Engine, *gorm.DB) {
 	schema, err := graphql.NewSchema(
 		graphql.SchemaConfig{
 			Query: rootQuery.Query,
+			Mutation: rootQuery.Mutation,
 		},
 	)
 	if err != nil {
