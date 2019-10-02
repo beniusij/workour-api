@@ -20,16 +20,16 @@ var UserType = g.NewObject(
 	g.ObjectConfig{
 		Name:        "User",
 		Fields:      g.Fields{
-			"id": &g.Field{
+			"ID": &g.Field{
 				Type: g.Int,
 			},
-			"email": &g.Field{
+			"Email": &g.Field{
 				Type: g.String,
 			},
-			"first_name": &g.Field{
+			"FirstName": &g.Field{
 				Type: g.String,
 			},
-			"last_name": &g.Field{
+			"LastName": &g.Field{
 				Type: g.String,
 			},
 		},
