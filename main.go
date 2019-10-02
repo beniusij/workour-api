@@ -36,10 +36,12 @@ func initAPI() (*gin.Engine, *gorm.DB) {
 	db := comm.InitDb()
 	router := gin.Default()
 
-	rootQuery := g.NewRoot(db)
+	rootQuery := g.NewRoot()
 	// Create a new graphql schema, passing in the root query
 	schema, err := graphql.NewSchema(
-		graphql.SchemaConfig{Query: rootQuery.Query},
+		graphql.SchemaConfig{
+			Query: rootQuery.Query,
+		},
 	)
 	if err != nil {
 		fmt.Println("error creating schema: ", err)

@@ -1,9 +1,9 @@
 package users
 
 import (
-	//"errors"
 	"errors"
 	"fmt"
+	g "github.com/graphql-go/graphql"
 	"golang.org/x/crypto/bcrypt"
 	"workour-api/common"
 )
@@ -15,6 +15,26 @@ type User struct {
 	LastName		string	`gorm:"column:last_name"`
 	PasswordHash	string	`gorm:"column:password;not null"`
 }
+
+var UserType = g.NewObject(
+	g.ObjectConfig{
+		Name:        "User",
+		Fields:      g.Fields{
+			"id": &g.Field{
+				Type: g.Int,
+			},
+			"email": &g.Field{
+				Type: g.String,
+			},
+			"first_name": &g.Field{
+				Type: g.String,
+			},
+			"last_name": &g.Field{
+				Type: g.String,
+			},
+		},
+	},
+)
 
 func AutoMigrate() {
 	db := common.GetDB()
