@@ -33,8 +33,8 @@ var mutationType = g.NewObject(
 	g.ObjectConfig{
 		Name: "Mutation",
 		Fields: g.Fields{
-			"user": &g.Field{
-				Type: u.UserRegisterType,
+			"register": &g.Field{
+				Type: u.UserType,
 				Args: g.FieldConfigArgument{
 					"email": &g.ArgumentConfig{
 						Type: g.NewNonNull(g.String),
@@ -53,7 +53,7 @@ var mutationType = g.NewObject(
 					},
 				},
 				Resolve: u.CreateUserResolver(),
-				Description: "Create a news user",
+				Description: "Create a new user",
 			},
 		},
 	},

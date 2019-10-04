@@ -13,6 +13,7 @@ import (
 	"workour-api/common"
 )
 
+const endpoint = "/graphql"
 var db *gorm.DB
 var unauthRequestTestCases = []struct{
 	init			func(r *http.Request)
@@ -23,44 +24,15 @@ var unauthRequestTestCases = []struct{
 	responseRegex	string
 	msg				string
 }{
-	//----------------------- Test cases for userModel registration ----------------------
+	//----------------------- Test cases for getting user by id ----------------------
 	{
-		func(r *http.Request) {
-			resetDb(false)
-		},
-		"/v1/user/create",
+		func(r *http.Request) {},
+		endpoint,
 		"POST",
 		`{"user":{"email":"test@example.com","first_name":"Test","last_name":"Testest","password":"TotallyValidPassword1!#","password_confirm":"TotallyValidPassword1!#"}}`,
 		http.StatusCreated,
 		`{"user":{"email":"test@example.com","first_name":"Test","last_name":"Testest","token":"([a-zA-Z0-9-_.]{115})"}}`,
 		"valid data and should return StatusCreated",
-	},
-	{
-		func(r *http.Request) {},
-		"/v1/user/create",
-		"POST",
-		`{"user":{"email":"test@example.com","first_name":"Test","last_name":"Testest","password":"TotallyValidPassword1!#","password_confirm":"TotallyValidPassword1!#"}}`,
-		http.StatusUnprocessableEntity,
-		`{"errors":{"database":"UNIQUE constraint failed: users.email"}}`,
-		"duplicated data and should return StatusUnprocessableEntity",
-	},
-	{
-		func(r *http.Request) {},
-		"/v1/user/create",
-		"POST",
-		`{"user":{"email":"test1@example.com","first_name":"t","last_name":"t","password":"","password_confirm":"TotallyValidPassword1!#"}}`,
-		http.StatusUnprocessableEntity,
-		`{"errors":{"FirstName":"{min: 2}","LastName":"{min: 2}","Password":"{min: 2}"}}`,
-		"first name, last name is too short and password must not be empty, and should return StatusUnprocessableEntity",
-	},
-	{
-		func(r *http.Request) {},
-		"/v1/user/create",
-		"POST",
-		`{"user":{"email":"test2@","first_name":"Test","last_name":"Testest","password":"TotallyValidPassword1!#","password_confirm":"TotallyValidPassword1!#"}}`,
-		http.StatusUnprocessableEntity,
-		`{"errors":{"Email":"{key: email}"}}`,
-		"invalid email and should return StatusUnprocessableEntity",
 	},
 }
 
