@@ -1,22 +1,28 @@
 package users
 
 import (
+	"fmt"
 	g "github.com/graphql-go/graphql"
 )
 
 // Handles mutation to create a user
 func CreateUserResolver() func(p g.ResolveParams) (interface{}, error) {
 	return func(p g.ResolveParams) (interface{}, error) {
-		//fmt.Printf("%v", reflect.TypeOf(p.Args))
-		validatedUser, err := validateUserForm(p.Args)
-		if err != nil {
+		userValidator := NewUserValidator()
+
+		if err := userValidator.validateUserForm(p.Args); err != nil {
 			return nil, err
 		}
 
-		user := &User{
-			Email: validatedUser.Email,
+		fmt.Println("Passed validation")
+
+		if err := SaveUser(&userValidator.userModel); err != nil {
+			return nil, err
 		}
-		return nil, nil
+
+		fmt.Println("User was created")
+
+		return &userValidator.userModel.ID, nil
 	}
 }
 

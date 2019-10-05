@@ -44,7 +44,7 @@ func AutoMigrate() {
 
 func SaveUser(data interface{}) error {
 	db := common.GetDB()
-	err := db.Save(data).Error
+	err := db.Create(data).Error
 	return err
 }
 
