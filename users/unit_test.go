@@ -106,9 +106,10 @@ func TestCreateUserResolver(t *testing.T) {
 	asserts.Nil(err, "Form data validated and should not return error")
 
 	user := u.User{}
-	_, err = user.SaveEntity(&userValidator.UserModel)
+	var id int
+	id, err = user.SaveEntity(&userValidator.UserModel)
 	asserts.Nil(err, "New user created with validated data")
-	asserts.NotNil(userValidator.UserModel.ID, "User has unique ID")
+	asserts.NotEqual(0, id, "User has unique ID")
 }
 
 func TestGetUserResolver(t *testing.T) {

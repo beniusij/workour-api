@@ -35,12 +35,6 @@ var UserType = g.NewObject(
 	},
 )
 
-func (u User) SaveEntity(data interface{}) (interface{}, error) {
-	db := common.GetDB()
-	err := db.Create(data).Error
-	return nil, err
-}
-
 func (u *User) SetPassword(password string) error {
 	if len(password) == 0 {
 		return errors.New("password cannot be empty")
@@ -60,6 +54,18 @@ func (u *User) CheckPassword(password string) error {
 	bytePassword := []byte(password)
 	hashedPassword := []byte(u.PasswordHash)
 	return bcrypt.CompareHashAndPassword(hashedPassword, bytePassword)
+}
+
+func (u User) SaveEntity(data interface{}) (int, error) {
+	db := common.GetDB()
+	user := data.(*User)
+	err := db.Create(&user).Error
+
+	if err != nil {
+		return 0, err
+	}
+
+	return user.ID, nil
 }
 
 func (u User) GetEntityById(id int) (*User, error) {
