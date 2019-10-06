@@ -105,8 +105,32 @@ func TestCreateUserResolver(t *testing.T) {
 	err = userValidator.ValidateForm(args)
 	asserts.Nil(err, "Form data validated and should not return error")
 
-	err = u.SaveUser(&userValidator.UserModel)
+	user := u.User{}
+	_, err = user.SaveEntity(&userValidator.UserModel)
 	asserts.Nil(err, "New user created with validated data")
-	fmt.Println(fmt.Sprintf("%v", &userValidator.UserModel.ID))
 	asserts.NotNil(userValidator.UserModel.ID, "User has unique ID")
+}
+
+func TestGetUserResolver(t *testing.T) {
+	asserts := assert.New(t)
+	userEntity := u.User{}
+	id := 1
+
+	args := map[string]interface{}{
+		"id":	id,
+	}
+
+	user, err := userEntity.GetEntityById(args["id"].(int))
+	asserts.Nil(err, "Successfully fetched user by ID, no erros")
+	asserts.Equalf(id, user.ID, "Successfully fetched user with ID %v", id)
+
+	id = 101
+	args = map[string]interface{}{
+		"id": id,
+	}
+
+	user, err = userEntity.GetEntityById(args["id"].(int))
+	expectedErr := errors.New("record not found")
+	asserts.Nil(user, "Attempt to fetch non-existent user returns nil for user")
+	asserts.EqualError(err, expectedErr.Error(), "Attempt to fetch non-existent user should return an error")
 }

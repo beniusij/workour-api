@@ -2,7 +2,6 @@ package users
 
 import (
 	"errors"
-	"fmt"
 	g "github.com/graphql-go/graphql"
 	"golang.org/x/crypto/bcrypt"
 	"workour-api/common"
@@ -36,16 +35,10 @@ var UserType = g.NewObject(
 	},
 )
 
-func AutoMigrate() {
-	db := common.GetDB()
-
-	db.AutoMigrate(&User{})
-}
-
-func SaveUser(data interface{}) error {
+func (u User) SaveEntity(data interface{}) (interface{}, error) {
 	db := common.GetDB()
 	err := db.Create(data).Error
-	return err
+	return nil, err
 }
 
 func (u *User) SetPassword(password string) error {
@@ -60,24 +53,23 @@ func (u *User) SetPassword(password string) error {
 	return nil
 }
 
-/**
- * Checks passed password against the hashed password
- * using bcrypt's function
- */
+
+// Checks passed password against the hashed password
+// using bcrypt's function
 func (u *User) CheckPassword(password string) error {
 	bytePassword := []byte(password)
 	hashedPassword := []byte(u.PasswordHash)
 	return bcrypt.CompareHashAndPassword(hashedPassword, bytePassword)
 }
 
-func GetUserById(id int) (User, error) {
+func (u User) GetEntityById(id int) (*User, error) {
 	db := common.GetDB()
-	var model User
-	err := db.Where(&User{ID: id}).First(&model).Error
+	user := User{}
+	err := db.Where(&User{ID: id}).First(&user).Error
 
 	if err != nil {
-		fmt.Printf("an error occurred while fetching user: %v", err)
+		return nil, err
 	}
 
-	return model, err
+	return &user, nil
 }

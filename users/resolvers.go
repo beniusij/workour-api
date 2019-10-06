@@ -7,25 +7,26 @@ import (
 // Handles mutation to create a user
 func CreateUserResolver(p g.ResolveParams) (interface{}, error) {
 	userValidator := NewUserValidator()
+	user := &User{}
 
 	if err := userValidator.ValidateForm(p.Args); err != nil {
 		return nil, err
 	}
 
-	if err := SaveUser(&userValidator.UserModel); err != nil {
+	if _, err := user.SaveEntity(&userValidator.UserModel); err != nil {
 		return nil, err
 	}
 
 	return userValidator.UserModel.ID, nil
 }
 
-// GetUserResolver resolves our user query through a db call to GetUserById
+// GetUserResolver resolves our user query through a db call to GetEntityById
 func GetUserResolver(p g.ResolveParams) (interface{}, error) {
-	// Strip the name from arguments and assert that it is an int
+	user := &User{}
 	id, ok := p.Args["id"].(int)
 
 	if ok {
-		user, err := GetUserById(id)
+		user, err := user.GetEntityById(id)
 		return user, err
 	}
 
