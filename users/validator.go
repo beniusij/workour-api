@@ -7,7 +7,7 @@ import (
 
 type UserModelValidator struct {
 	user struct{
-		Email			string `validate:"required,email,unique"`
+		Email			string `validate:"required,email"`
 		FirstName		string `validate:"required,min=2,max=255"`
 		LastName		string `validate:"required,min=2,max=255"`
 		Password		string `validate:"required,min=8,max=255"`
@@ -33,7 +33,7 @@ func (u *UserModelValidator) ValidateForm(p map[string]interface{}) error {
 	u.user.Password = p["password"].(string)
 	u.user.PasswordConfirm = p["password_confirm"].(string)
 
-	err := validate.Struct(u)
+	err := validate.Struct(u.user)
 	if err != nil {
 		fmt.Println(fmt.Sprintf("Error validating form: %v", err))
 		return err

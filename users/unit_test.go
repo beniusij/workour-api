@@ -91,7 +91,7 @@ func TestCreateUserResolver(t *testing.T) {
 	}
 
 	err := userValidator.ValidateForm(args)
-	expectedErr := errors.New("an error is expected but got nil")
+	expectedErr := errors.New("Key: 'Email' Error:Field validation for 'Email' failed on the 'email' tag\nKey: 'LastName' Error:Field validation for 'LastName' failed on the 'required' tag\nKey: 'Password' Error:Field validation for 'Password' failed on the 'min' tag\nKey: 'PasswordConfirm' Error:Field validation for 'PasswordConfirm' failed on the 'eqfield' tag")
 	asserts.EqualError(err, expectedErr.Error(), "Form data did not validate and returns an error")
 
 	args = map[string]interface{}{
@@ -101,7 +101,6 @@ func TestCreateUserResolver(t *testing.T) {
 		"password":			"Testest3!",
 		"password_confirm":	"Testest3!",
 	}
-	t.Logf("%v", args)
 
 	err = userValidator.ValidateForm(args)
 	asserts.Nil(err, "Form data validated and should not return error")
