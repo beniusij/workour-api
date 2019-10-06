@@ -23,12 +23,12 @@ func CreateUserResolver(p g.ResolveParams) (interface{}, error) {
 // GetUserResolver resolves our user query through a db call to GetEntityById
 func GetUserResolver(p g.ResolveParams) (interface{}, error) {
 	user := &User{}
-	id, ok := p.Args["id"].(int)
+	id := p.Args["id"].(int)
 
-	if ok {
-		user, err := user.GetEntityById(id)
-		return user, err
+	user, err := user.GetEntityById(id)
+	if err != nil {
+		return nil, err
 	}
 
-	return nil, nil
+	return user, nil
 }
