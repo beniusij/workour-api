@@ -3,19 +3,12 @@ package common
 import (
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
-	"github.com/gin-gonic/gin"
-	"github.com/gin-gonic/gin/binding"
 	"gopkg.in/go-playground/validator.v8"
 	"time"
 )
 
 type CommonError struct {
 	Errors map[string]interface{} `json:"errors"`
-}
-
-func Bind(c *gin.Context, obj interface{}) error {
-	b := binding.Default(c.Request.Method, c.ContentType())
-	return c.ShouldBindWith(obj, b)
 }
 
 func NewError(key string, err error) CommonError {
