@@ -114,6 +114,7 @@ func TestCreateUserResolver(t *testing.T) {
 
 func TestGetUserResolver(t *testing.T) {
 	asserts := assert.New(t)
+	resetDb(true)
 	userEntity := u.User{}
 	id := 1
 

@@ -8,10 +8,6 @@ import (
 	"os"
 )
 
-type Database struct {
-	db *gorm.DB
-}
-
 var DB *gorm.DB
 var testDbPath = "./../gorm_test.db"
 
