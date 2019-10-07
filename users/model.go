@@ -2,7 +2,6 @@ package users
 
 import (
 	"errors"
-	g "github.com/graphql-go/graphql"
 	"golang.org/x/crypto/bcrypt"
 	"workour-api/common"
 )
@@ -14,26 +13,6 @@ type User struct {
 	LastName		string	`gorm:"column:last_name"`
 	PasswordHash	string	`gorm:"column:password;not null"`
 }
-
-var UserType = g.NewObject(
-	g.ObjectConfig{
-		Name:        "User",
-		Fields:      g.Fields{
-			"ID": &g.Field{
-				Type: g.Int,
-			},
-			"Email": &g.Field{
-				Type: g.String,
-			},
-			"FirstName": &g.Field{
-				Type: g.String,
-			},
-			"LastName": &g.Field{
-				Type: g.String,
-			},
-		},
-	},
-)
 
 func (u *User) SetPassword(password string) error {
 	if len(password) == 0 {

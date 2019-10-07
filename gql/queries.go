@@ -16,7 +16,7 @@ var queryType = g.NewObject(
 		Name: "Query",
 		Fields: g.Fields{
 			"user": &g.Field{
-				Type: u.UserType,
+				Type: UserType,
 				Args: g.FieldConfigArgument{
 					"id": &g.ArgumentConfig{
 						Type: g.Int,
@@ -34,7 +34,7 @@ var mutationType = g.NewObject(
 		Name: "Mutation",
 		Fields: g.Fields{
 			"register": &g.Field{
-				Type: u.UserType,
+				Type: UserType,
 				Args: g.FieldConfigArgument{
 					"email": &g.ArgumentConfig{
 						Type: g.NewNonNull(g.String),
