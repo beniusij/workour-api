@@ -42,6 +42,7 @@ func TestCreateUserResolver(t *testing.T) {
 		args map[string]interface{}
 		err, expectedErr error
 	)
+	resetDb(false)
 
 	t.Run("returns JSON of errors for invalid form data", func(t *testing.T) {
 		args = map[string]interface{}{
@@ -73,7 +74,7 @@ func TestCreateUserResolver(t *testing.T) {
 		var id int
 		id, err = user.SaveEntity(&userValidator.UserModel)
 		asserts.Nil(err, "New user created with validated data")
-		asserts.NotEqual(0, id, "User has unique ID")
+		asserts.Equal(1, id, "User has ID 1")
 	})
 
 	resetDb(false)
