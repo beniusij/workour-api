@@ -19,6 +19,3 @@ start:
 
 stop:
 	@docker stop workour_db
-
-test:
-	@go test ./users/
