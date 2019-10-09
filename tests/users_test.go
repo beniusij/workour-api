@@ -2,19 +2,9 @@ package tests
 
 import (
 	"errors"
-	"os"
 	"testing"
-	"workour-api/common"
 	u "workour-api/users"
 )
-
-func TestMain(m *testing.M) {
-	db = common.InitTestDb()
-	db.AutoMigrate(&u.User{})
-	exitval := m.Run()
-	_ = common.ResetTestDb(db)
-	os.Exit(exitval)
-}
 
 func TestUserSettingAndCheckingPassword(t *testing.T) {
 	asserts := getAsserts(t)
@@ -44,19 +34,50 @@ func TestCreateUserResolver(t *testing.T) {
 	)
 	resetDb(false)
 
-	t.Run("returns JSON of errors for invalid form data", func(t *testing.T) {
-		args = map[string]interface{}{
-			"email": 			"test1",
-			"first_name":		"Te",
-			"last_name":		"",
-			"password":			"Te",
-			"password_confirm":	"Test",
-		}
+	// Init faulty testing data
+	var faultyData = []struct{
+		msg		string
+		args	map[string]interface{}
+	}{
+		{
+			"standard faulty data, returns JSON with errors",
+			map[string]interface{}{
+				"email": 			"test1",
+				"first_name":		"Te",
+				"last_name":		"",
+				"password":			"Te",
+				"password_confirm":	"Test",
+			},
+		},
+		{
+			"only numbers in data, returns JSON with errors",
+			map[string]interface{}{
+				"email": 			"123456@12314.12",
+				"first_name":		"12",
+				"last_name":		"",
+				"password":			"34",
+				"password_confirm":	"456678990",
+			},
+		},
+		{
+			"data with html tags and symbols, returns JSON with errors",
+			map[string]interface{}{
+				"email": 			"<input type='email'>test@example.com</input>",
+				"first_name":		"<p>My Test Name</p>",
+				"last_name":		"",
+				"password":			"<>",
+				"password_confirm":	"~!@£$%^&*()_+|}{P:?><",
+			},
+		},
+	}
 
-		err = userValidator.ValidateForm(args)
-		expectedErr = errors.New("Key: 'Email' Error:Field validation for 'Email' failed on the 'email' tag\nKey: 'LastName' Error:Field validation for 'LastName' failed on the 'required' tag\nKey: 'Password' Error:Field validation for 'Password' failed on the 'min' tag\nKey: 'PasswordConfirm' Error:Field validation for 'PasswordConfirm' failed on the 'eqfield' tag")
-		asserts.EqualError(err, expectedErr.Error(), "Form data did not validate and returns an error")
-	})
+	for _, data := range faultyData {
+		t.Run(data.msg, func(t *testing.T) {
+			err = userValidator.ValidateForm(data.args)
+			expectedErr = errors.New("Key: 'Email' Error:Field validation for 'Email' failed on the 'email' tag\nKey: 'LastName' Error:Field validation for 'LastName' failed on the 'required' tag\nKey: 'Password' Error:Field validation for 'Password' failed on the 'min' tag\nKey: 'PasswordConfirm' Error:Field validation for 'PasswordConfirm' failed on the 'eqfield' tag")
+			asserts.EqualError(err, expectedErr.Error(), "Form data did not validate and returns an error")
+		})
+	}
 
 	t.Run("creates user and returns its ID", func(t *testing.T) {
 		args = map[string]interface{}{

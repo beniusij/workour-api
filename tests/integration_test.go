@@ -4,7 +4,10 @@ import (
 	"bytes"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
+	"workour-api/common"
+	u "workour-api/users"
 )
 
 var unauthRequestTestCases = []struct{
@@ -28,6 +31,14 @@ var unauthRequestTestCases = []struct{
 		`{"data":{"user":{"ID":null}}}`,
 		"valid data and should return StatusCreated",
 	},
+}
+
+func TestMain(m *testing.M) {
+	db = common.InitTestDb()
+	db.AutoMigrate(&u.User{})
+	exitval := m.Run()
+	_ = common.ResetTestDb(db)
+	os.Exit(exitval)
 }
 
 func TestWithoutAuth(t *testing.T) {
