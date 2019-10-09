@@ -1,7 +1,6 @@
 package users
 
 import (
-	"fmt"
 	"gopkg.in/go-playground/validator.v9"
 )
 
@@ -35,7 +34,6 @@ func (u *UserModelValidator) ValidateForm(p map[string]interface{}) error {
 
 	err := validate.Struct(u.user)
 	if err != nil {
-		fmt.Println(fmt.Sprintf("Error validating form: %v", err))
 		return err
 	}
 
@@ -45,7 +43,6 @@ func (u *UserModelValidator) ValidateForm(p map[string]interface{}) error {
 	u.UserModel.LastName = u.user.LastName
 	err = u.UserModel.SetPassword(u.user.Password)
 	if err != nil {
-		fmt.Println(fmt.Sprintf("Error setting password: %v", err))
 		return err
 	}
 

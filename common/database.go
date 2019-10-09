@@ -44,11 +44,11 @@ func GetDB() *gorm.DB {
 func InitTestDb() * gorm.DB {
 	testDb, err := gorm.Open("sqlite3", testDbPath)
 	if err != nil {
-		fmt.Println("db err: ", err)
+		panic(err)
 	}
 
 	testDb.DB().SetMaxIdleConns(3)
-	testDb.LogMode(true)
+	testDb.LogMode(false)
 	DB = testDb
 	return testDb
 }
