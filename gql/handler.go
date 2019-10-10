@@ -35,9 +35,6 @@ func GraphQL(sc graphql.Schema) gin.HandlerFunc {
 			return
 		}
 
-		// render.JSON comes from the chi/render package and handles
-		// marshalling to json, automatically escaping HTML and setting
-		// the Content-Type as application/json.
 		c.JSON(http.StatusOK, result)
 	}
 }

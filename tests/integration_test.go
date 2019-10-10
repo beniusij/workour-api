@@ -27,8 +27,8 @@ var unauthRequestTestCases = []struct{
 		endpoint,
 		"POST",
 		`{"query": "mutation { user: register(email: \"test@example.com\", first_name: \"Test\", last_name: \"Testest\", password: \"Password123\", password_confirm: \"Password123\") { ID } }"}`,
-		http.StatusOK,
-		`{"data":{"user":{"ID":null}}}`,
+		http.StatusCreated,
+		`{"data":{"user":{"ID":1}}}`,
 		"valid data and should return StatusCreated",
 	},
 }

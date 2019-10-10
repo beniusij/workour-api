@@ -17,7 +17,7 @@ func CreateUserResolver(p g.ResolveParams) (interface{}, error) {
 		return nil, err
 	}
 
-	return userValidator.UserModel.ID, nil
+	return userValidator.UserModel, nil
 }
 
 // GetUserResolver resolves our user query through a db call to GetEntityById
