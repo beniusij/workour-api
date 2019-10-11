@@ -1,13 +1,16 @@
 package users
 
 import (
+	"github.com/gin-gonic/gin"
 	g "github.com/graphql-go/graphql"
+	"net/http"
 )
 
 // Handles mutation to create a user
 func CreateUserResolver(p g.ResolveParams) (interface{}, error) {
 	userValidator := NewUserValidator()
 	user := &User{}
+	c := p.Context.(*gin.Context)
 
 	if err := userValidator.ValidateForm(p.Args); err != nil {
 		return nil, err
@@ -16,6 +19,8 @@ func CreateUserResolver(p g.ResolveParams) (interface{}, error) {
 	if _, err := user.SaveEntity(&userValidator.UserModel); err != nil {
 		return nil, err
 	}
+
+	c.Set("status", http.StatusCreated)
 
 	return userValidator.UserModel, nil
 }

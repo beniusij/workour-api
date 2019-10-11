@@ -16,7 +16,7 @@ func GraphQL(sc graphql.Schema) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Check to ensure query was provided in the request body
 		if c.Request.Body == nil {
-			http.Error(c.Writer, "Must provide graphql query in request body", http.StatusUnprocessableEntity)
+			http.Error(c.Writer, "Must provide graphql query in request body", http.StatusBadRequest)
 			return
 		}
 
@@ -24,17 +24,18 @@ func GraphQL(sc graphql.Schema) gin.HandlerFunc {
 		// Decode the request body into rBody
 		err := json.NewDecoder(c.Request.Body).Decode(&rBody)
 		if err != nil {
-			http.Error(c.Writer, "Error parsing JSON request body", http.StatusUnprocessableEntity)
+			http.Error(c.Writer, "Error parsing JSON request body", http.StatusBadRequest)
 		}
 
 		// Execute graphql query
-		result, errs := ExecuteQuery(rBody.Query, sc)
+		result, errs := ExecuteQuery(rBody.Query, sc, c)
 
 		if len(errs) > 0 {
 			c.JSON(http.StatusBadRequest, result)
 			return
 		}
 
-		c.JSON(http.StatusOK, result)
+		status, _ := c.Get("status")
+		c.JSON(status.(int), result)
 	}
 }

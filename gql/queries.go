@@ -1,6 +1,7 @@
 package gql
 
 import (
+	"github.com/gin-gonic/gin"
 	g "github.com/graphql-go/graphql"
 	"github.com/graphql-go/graphql/gqlerrors"
 	u "workour-api/users"
@@ -72,8 +73,9 @@ func NewRoot() *Root {
 }
 
 // This one runs our graphql queries
-func ExecuteQuery(query string, schema g.Schema) (*g.Result, gqlerrors.FormattedErrors) {
+func ExecuteQuery(query string, schema g.Schema, c *gin.Context) (*g.Result, gqlerrors.FormattedErrors) {
 	result := g.Do(g.Params{
+		Context:		c,
 		Schema:			schema,
 		RequestString:	query,
 	})

@@ -19,7 +19,7 @@ var unauthRequestTestCases = []struct{
 	responseRegex	string
 	msg				string
 }{
-	//----------------------- Test cases for getting user by id ----------------------
+	//----------------------- Test cases for registering user ----------------------
 	{
 		func(r *http.Request) {
 			resetDb(false)
@@ -30,6 +30,33 @@ var unauthRequestTestCases = []struct{
 		http.StatusCreated,
 		`{"data":{"user":{"ID":1}}}`,
 		"valid data and should return StatusCreated",
+	},
+	{
+		func(r *http.Request) {},
+		endpoint,
+		"POST",
+		`{"query": "mutation { user: register(email: \"test@example.com\", first_name: \"Test\", last_name: \"Testest\", password: \"Password123\", password_confirm: \"Password123\") { ID } }"}`,
+		http.StatusBadRequest,
+		"UNIQUE constraint failed: users.email",
+		"use of non-unique email should fail and return StatusBadRequest",
+	},
+	{
+		func(r *http.Request) {},
+		endpoint,
+		"POST",
+		`{"query": "mutation { user: register(email: \"test1\", first_name: \"Test\", last_name: \"Testest\", password: \"Password123\", password_confirm: \"Password123\") { ID } }"}`,
+		http.StatusBadRequest,
+		"Error:Field validation for 'Email' failed on the 'email' tag",
+		"form with invalid email should fail and return StatusBadRequest",
+	},
+	{
+		func(r *http.Request) {},
+		endpoint,
+		"POST",
+		`{"query": "mutation { user: register(email: \"test1@example.com\", first_name: \"T\", last_name: \"\", password: \"Password123\", password_confirm: \"\") { ID } }"}`,
+		http.StatusBadRequest,
+		"min",
+		"form with invalid first & last names, password and confirm password fields should fail and return StatusBadRequest",
 	},
 }
 
@@ -43,21 +70,22 @@ func TestMain(m *testing.M) {
 
 func TestWithoutAuth(t *testing.T) {
 	asserts := getAsserts(t)
-
 	r := initTestAPI()
 
-	for _, testCase := range unauthRequestTestCases {
-		bodyData := testCase.bodyData
-		request, err := http.NewRequest(testCase.method, testCase.url, bytes.NewBufferString(bodyData))
-		asserts.NoError(err)
-		request.Header.Set("Content-Type", "application/json")
+	for _, tc := range unauthRequestTestCases {
+		t.Run(tc.msg, func(t *testing.T) {
+			bodyData := tc.bodyData
+			request, err := http.NewRequest(tc.method, tc.url, bytes.NewBufferString(bodyData))
+			asserts.NoError(err)
+			request.Header.Set("Content-Type", "application/json")
 
-		testCase.init(request)
+			tc.init(request)
 
-		response := httptest.NewRecorder()
-		r.ServeHTTP(response, request)
+			response := httptest.NewRecorder()
+			r.ServeHTTP(response, request)
 
-		asserts.Equal(testCase.expectedCode, response.Code, "Response Status - "+testCase.msg)
-		asserts.Regexp(testCase.responseRegex, response.Body.String(), "Response Content - "+testCase.msg)
+			asserts.Equal(tc.expectedCode, response.Code, "Response Status - "+tc.msg)
+			asserts.Regexp(tc.responseRegex, response.Body.String(), "Response Content - "+tc.msg)
+		})
 	}
 }
