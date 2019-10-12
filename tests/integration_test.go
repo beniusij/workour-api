@@ -53,10 +53,28 @@ var unauthRequestTestCases = []struct{
 		func(r *http.Request) {},
 		endpoint,
 		"POST",
-		`{"query": "mutation { user: register(email: \"test1@example.com\", first_name: \"T\", last_name: \"\", password: \"Password123\", password_confirm: \"\") { ID } }"}`,
+		`{"query": "mutation { user: register(email: \"test1@example.com\", first_name: \"T\", last_name: \"Testst\", password: \"Password123\", password_confirm: \"Password123\") { ID } }"}`,
 		http.StatusBadRequest,
-		"min",
-		"form with invalid first & last names, password and confirm password fields should fail and return StatusBadRequest",
+		`Field validation for 'FirstName' failed on the 'min' tag"`,
+		"form with invalid first name should fail and return StatusBadRequest",
+	},
+	{
+		func(r *http.Request) {},
+		endpoint,
+		"POST",
+		`{"query": "mutation { user: register(email: \"test1@example.com\", first_name: \"Test\", last_name: \"\", password: \"Password123\", password_confirm: \"Password123\") { ID } }"}`,
+		http.StatusBadRequest,
+		`Field validation for 'LastName' failed on the 'required' tag"`,
+		"form with no last name should fail and return StatusBadRequest",
+	},
+	{
+		func(r *http.Request) {},
+		endpoint,
+		"POST",
+		`{"query": "mutation { user: register(email: \"test1@example.com\", first_name: \"Test\", last_name: \"Testest\", password: \"Password123\", password_confirm: \"Password12\") { ID } }"}`,
+		http.StatusBadRequest,
+		`Field validation for 'PasswordConfirm' failed on the 'eqfield' tag"`,
+		"form with not matching passwords should fail and return StatusBadRequest",
 	},
 }
 
@@ -83,6 +101,8 @@ func TestWithoutAuth(t *testing.T) {
 
 			response := httptest.NewRecorder()
 			r.ServeHTTP(response, request)
+
+			t.Log(response.Body.String())
 
 			asserts.Equal(tc.expectedCode, response.Code, "Response Status - "+tc.msg)
 			asserts.Regexp(tc.responseRegex, response.Body.String(), "Response Content - "+tc.msg)
