@@ -49,6 +49,11 @@ func initAPI() (*gin.Engine, *gorm.DB) {
 	}
 
 	router.POST("/graphql", g.GraphQL(schema))
+	router.OPTIONS("/graphql", func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+		c.Writer.Header().Set("Access-Control-Request-Method","POST")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+	})
 
 	return router, db
 }
