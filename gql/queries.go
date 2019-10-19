@@ -73,11 +73,12 @@ func NewRoot() *Root {
 }
 
 // This one runs our graphql queries
-func ExecuteQuery(query string, schema g.Schema, c *gin.Context) (*g.Result, gqlerrors.FormattedErrors) {
+func ExecuteQuery(query string, v map[string]interface{}, schema g.Schema, c *gin.Context) (*g.Result, gqlerrors.FormattedErrors) {
 	result := g.Do(g.Params{
 		Context:		c,
 		Schema:			schema,
 		RequestString:	query,
+		VariableValues:	v,
 	})
 
 	return result, result.Errors
