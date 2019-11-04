@@ -18,6 +18,7 @@ var creds = map[string]interface{}{
 }
 
 var jwtSecret = []byte("SecretStringForSigningTokens")
+var TokenRegex = `^[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*$`
 
 func (t *StubAuthToken)GenerateToken(email string) (string, error) {
 	claims := jwt.MapClaims{
@@ -101,8 +102,6 @@ func (t *StubAuthToken)RefreshToken() (string, error) {
 	return t.token, nil
 }
 
-var tokenRegex = `^[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*$`
-
 func initTestToken() (StubAuthToken, error) {
 	var token StubAuthToken
 	tokenString, err := token.GenerateToken(creds["email"].(string))
@@ -124,7 +123,7 @@ func TestGenerateToken(t *testing.T) {
 	// Verify that generated string matches JWT token regex
 	asserts.NoError(err, "no error is returned")
 	asserts.NotNil(token, "token is not nil")
-	asserts.Regexp(tokenRegex, token.token, "JWT token matches token regex")
+	asserts.Regexp(TokenRegex, token.token, "JWT token matches token regex")
 
 	// Verify that the JWT contains three segments, separated by two period ('.') characters
 	tokenSlice := strings.Split(token.token, ".")
