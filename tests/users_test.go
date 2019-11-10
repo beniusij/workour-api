@@ -25,6 +25,23 @@ func TestUserSettingAndCheckingPassword(t *testing.T) {
 	asserts.NoError(err, "password should be checked and validated")
 }
 
+func TestGetUserByEmail(t *testing.T) {
+	asserts := getAsserts(t)
+	resetDb(true)
+
+	email := "userModel1@yahoo.com"
+	user, err := u.GetUserByEmail(email)
+
+	asserts.NoError(err, "no errors are returned when fetching user by email")
+	asserts.EqualValues(email, user.Email, "user fetched has the same email as the one used for getting user")
+
+	invalidEmail := "invalid@email.com"
+	user, err = u.GetUserByEmail(invalidEmail)
+
+	asserts.Error(err, "record not found")
+	asserts.Equal(0, user.ID, "no user is returned for the invalid email")
+}
+
 func TestCreateUserResolver(t *testing.T) {
 	asserts := getAsserts(t)
 	userValidator := u.NewUserValidator()

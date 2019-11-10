@@ -58,3 +58,12 @@ func (u User) GetEntityById(id int) (*User, error) {
 
 	return &user, nil
 }
+
+func GetUserByEmail(email string) (User, error) {
+	db := common.GetDB()
+	user := User{}
+
+	err := db.Where(&User{Email: email}).First(&user).Error
+
+	return user, err
+}
