@@ -43,6 +43,12 @@ func GraphQL(sc graphql.Schema) gin.HandlerFunc {
 		}
 
 		status, _ := c.Get("status")
+		if status == nil {
+			fmt.Println(fmt.Sprint("no status is returned"))
+			c.JSON(http.StatusBadRequest, nil)
+			return
+		}
+
 		c.JSON(status.(int), result)
 	}
 }
