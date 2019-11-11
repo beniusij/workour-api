@@ -2,9 +2,11 @@ package tests
 
 import (
 	"bytes"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strings"
 	"testing"
 	"workour-api/common"
 	u "workour-api/users"
@@ -102,10 +104,74 @@ func TestWithoutAuth(t *testing.T) {
 			response := httptest.NewRecorder()
 			r.ServeHTTP(response, request)
 
-			t.Log(response.Body.String())
-
 			asserts.Equal(tc.expectedCode, response.Code, "Response Status - "+tc.msg)
 			asserts.Regexp(tc.responseRegex, response.Body.String(), "Response Content - "+tc.msg)
+		})
+	}
+}
+
+const tokenType = "Bearer"
+var loginTestCases = []struct{
+	url				string
+	msg				string
+	query			string
+	expectedCode	int
+	responseData	string
+	isAuth			bool
+}{
+	{
+		publicEndpoint,
+		"form with correct credentials should return response with Authorization header and user's full name",
+		`{"query": "mutation { user: login(email: \"userModel1@yahoo.com\", password: \"Password123\") { FirstName, LastName, Email } }"}`,
+		200,
+		`{"data":{"user":{"Email":"userModel1@yahoo.com","FirstName":"User1","LastName":"User1"}}}`,
+		true,
+	},
+	{
+		publicEndpoint,
+		"form with incorrect credentials should return response with Authorization header and user's full name",
+		`{"query": "mutation { user: login(email: \"userModel2@yahoo.com\", password: \"<p disabled>Incorrect psw</p>\") { FirstName, LastName, Email } }"}`,
+		400,
+		`{"user":null}`,
+		false,
+	},
+	{
+		publicEndpoint,
+		"form with incorrect credentials should return response with Authorization header and user's full name",
+		`{"query": "mutation { user: login(email: \"\", password: \"\") { FirstName, LastName, Email } }"}`,
+		400,
+		`{"user":null}`,
+		false,
+	},
+}
+func TestAuthentication(t *testing.T) {
+	asserts := getAsserts(t)
+	r := initTestAPI()
+	resetDb(true)
+
+	for _, tc := range loginTestCases {
+		t.Run(tc.msg, func(t *testing.T) {
+			query := tc.query
+			request, err := http.NewRequest("POST", tc.url, bytes.NewBufferString(query))
+			asserts.NoError(err)
+			request.Header.Set("Content-Type", "application/json")
+
+			response := httptest.NewRecorder()
+			r.ServeHTTP(response, request)
+
+			asserts.Equal(tc.expectedCode, response.Code, fmt.Sprintf("Response Status - %s", tc.msg))
+			asserts.Regexp(tc.responseData, response.Body.String(), fmt.Sprintf("Response Content - %s", tc.msg))
+
+			responseResult := response.Result()
+			val, ok := responseResult.Header["Authorization"]
+
+			asserts.EqualValues(tc.isAuth, ok, "response has auth header")
+
+			if ok {
+				token := strings.Fields(val[0])
+				asserts.EqualValues(tokenType, token[0], "token contains correct type")
+				asserts.Regexp(TokenRegex, token[1], "jwt token is in correct format")
+			}
 		})
 	}
 }

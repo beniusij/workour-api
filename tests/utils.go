@@ -13,6 +13,7 @@ import (
 )
 
 const endpoint = "/graphql"
+const publicEndpoint = "/public"
 var db *gorm.DB
 var asserts *assert.Assertions
 
@@ -37,6 +38,7 @@ func initTestAPI() *gin.Engine {
 	}
 
 	router.POST(endpoint, gql.GraphQL(schema))
+	router.POST(publicEndpoint, gql.GraphQL(schema))
 
 	return router
 }

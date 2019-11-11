@@ -148,7 +148,7 @@ func TestDecodeToken(t *testing.T) {
 	asserts := getAsserts(t)
 	token, _ := initTestToken()
 
-	t.Run("valid token should be decoable and return map with email and exp", func(t *testing.T) {
+	t.Run("valid token should be decodeable and return map with email and exp", func(t *testing.T) {
 		claimsMap, err := token.DecodeToken()
 
 		asserts.NoError(err, "no error returned while decoding token")

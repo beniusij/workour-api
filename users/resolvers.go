@@ -1,9 +1,11 @@
 package users
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	g "github.com/graphql-go/graphql"
 	"net/http"
+	c "workour-api/common"
 )
 
 // Handles mutation to create a user
@@ -34,6 +36,40 @@ func GetUserResolver(p g.ResolveParams) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	return user, nil
+}
+
+// The resolver evaluates if user with provided email exists, and if so
+// authenticates with provided password. If authentication succeeds a token
+// is created and set in the header, and user non-sensitive details are
+// returned in the response body.
+func AuthenticateUserResolver(p g.ResolveParams) (interface{}, error) {
+	// Get user by email
+	email := p.Args["email"].(string)
+	user, err := GetUserByEmail(email)
+	if err != nil {
+		return nil, err
+	}
+
+	// Check password
+	psw := p.Args["password"].(string)
+	err = user.CheckPassword(psw)
+	if err != nil {
+		return nil, err
+	}
+
+	// Generate token
+	authToken := c.AuthToken{}
+	token, err := authToken.GenerateToken(email)
+	if err != nil {
+		return nil, err
+	}
+
+	// Set token in the header
+	c := p.Context.(*gin.Context)
+	c.Header("Authorization", fmt.Sprintf("Bearer %s", token))
+	c.Set("status", http.StatusOK)
 
 	return user, nil
 }

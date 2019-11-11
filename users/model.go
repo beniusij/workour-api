@@ -32,7 +32,12 @@ func (u *User) SetPassword(password string) error {
 func (u *User) CheckPassword(password string) error {
 	bytePassword := []byte(password)
 	hashedPassword := []byte(u.PasswordHash)
-	return bcrypt.CompareHashAndPassword(hashedPassword, bytePassword)
+
+	if bcrypt.CompareHashAndPassword(hashedPassword, bytePassword) != nil {
+		return errors.New("authentication failed")
+	}
+
+	return nil
 }
 
 func (u User) SaveEntity(data interface{}) (int, error) {
