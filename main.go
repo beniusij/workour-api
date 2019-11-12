@@ -48,8 +48,8 @@ func initAPI() (*gin.Engine, *gorm.DB) {
 		fmt.Println("error creating schema: ", err)
 	}
 
-	router.POST("/graphql", g.GraphQL(schema))
-	router.OPTIONS("/graphql", func(c *gin.Context) {
+	router.POST("/public", g.GraphQL(schema))
+	router.OPTIONS("/public", func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
 		c.Writer.Header().Set("Access-Control-Request-Method","POST, OPTIONS")
 		c.Writer.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, Accept-Encoding")

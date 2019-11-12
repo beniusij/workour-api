@@ -26,7 +26,7 @@ var unauthRequestTestCases = []struct{
 		func(r *http.Request) {
 			resetDb(false)
 		},
-		endpoint,
+		publicEndpoint,
 		"POST",
 		`{"query": "mutation { user: register(email: \"test@example.com\", first_name: \"Test\", last_name: \"Testest\", password: \"Password123\", password_confirm: \"Password123\") { ID } }"}`,
 		http.StatusCreated,
@@ -35,7 +35,7 @@ var unauthRequestTestCases = []struct{
 	},
 	{
 		func(r *http.Request) {},
-		endpoint,
+		publicEndpoint,
 		"POST",
 		`{"query": "mutation { user: register(email: \"test@example.com\", first_name: \"Test\", last_name: \"Testest\", password: \"Password123\", password_confirm: \"Password123\") { ID } }"}`,
 		http.StatusBadRequest,
@@ -44,7 +44,7 @@ var unauthRequestTestCases = []struct{
 	},
 	{
 		func(r *http.Request) {},
-		endpoint,
+		publicEndpoint,
 		"POST",
 		`{"query": "mutation { user: register(email: \"test1\", first_name: \"Test\", last_name: \"Testest\", password: \"Password123\", password_confirm: \"Password123\") { ID } }"}`,
 		http.StatusBadRequest,
@@ -53,7 +53,7 @@ var unauthRequestTestCases = []struct{
 	},
 	{
 		func(r *http.Request) {},
-		endpoint,
+		publicEndpoint,
 		"POST",
 		`{"query": "mutation { user: register(email: \"test1@example.com\", first_name: \"T\", last_name: \"Testst\", password: \"Password123\", password_confirm: \"Password123\") { ID } }"}`,
 		http.StatusBadRequest,
@@ -62,7 +62,7 @@ var unauthRequestTestCases = []struct{
 	},
 	{
 		func(r *http.Request) {},
-		endpoint,
+		publicEndpoint,
 		"POST",
 		`{"query": "mutation { user: register(email: \"test1@example.com\", first_name: \"Test\", last_name: \"\", password: \"Password123\", password_confirm: \"Password123\") { ID } }"}`,
 		http.StatusBadRequest,
@@ -71,7 +71,7 @@ var unauthRequestTestCases = []struct{
 	},
 	{
 		func(r *http.Request) {},
-		endpoint,
+		publicEndpoint,
 		"POST",
 		`{"query": "mutation { user: register(email: \"test1@example.com\", first_name: \"Test\", last_name: \"Testest\", password: \"Password123\", password_confirm: \"Password12\") { ID } }"}`,
 		http.StatusBadRequest,
