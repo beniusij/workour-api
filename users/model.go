@@ -32,19 +32,24 @@ func (u *User) SetPassword(password string) error {
 func (u *User) CheckPassword(password string) error {
 	bytePassword := []byte(password)
 	hashedPassword := []byte(u.PasswordHash)
-	return bcrypt.CompareHashAndPassword(hashedPassword, bytePassword)
+
+	if bcrypt.CompareHashAndPassword(hashedPassword, bytePassword) != nil {
+		return errors.New("incorrect email and/or password")
+	}
+
+	return nil
 }
 
-func (u User) SaveEntity(data interface{}) (int, error) {
+func (u User) SaveEntity(data interface{}) (User, error) {
 	db := common.GetDB()
-	user := data.(*User)
+	user := data.(User)
 	err := db.Create(&user).Error
 
 	if err != nil {
-		return 0, err
+		return user, err
 	}
 
-	return user.ID, nil
+	return user, nil
 }
 
 func (u User) GetEntityById(id int) (*User, error) {
@@ -57,4 +62,13 @@ func (u User) GetEntityById(id int) (*User, error) {
 	}
 
 	return &user, nil
+}
+
+func GetUserByEmail(email string) (User, error) {
+	db := common.GetDB()
+	user := User{}
+
+	err := db.Where(&User{Email: email}).First(&user).Error
+
+	return user, err
 }

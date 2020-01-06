@@ -18,6 +18,23 @@ var UserType = g.NewObject(
 			"LastName": &g.Field{
 				Type: g.String,
 			},
+			"Token": &g.Field{
+				Type: g.String,
+			},
+		},
+	},
+)
+
+var SessionType = g.NewObject(
+	g.ObjectConfig{
+		Name:	"Session",
+		Fields:	g.Fields{
+			"Token": &g.Field{
+				Type: g.String,
+			},
+			"Email": &g.Field{
+				Type: g.String,
+			},
 		},
 	},
 )

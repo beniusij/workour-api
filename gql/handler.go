@@ -37,12 +37,17 @@ func GraphQL(sc graphql.Schema) gin.HandlerFunc {
 		result, errs := ExecuteQuery(rBody.Query, rBody.Variables, sc, c)
 
 		if len(errs) > 0 {
-			fmt.Println(fmt.Sprintf("Errors: %v", errs))
-			c.JSON(http.StatusBadRequest, result)
+			c.JSON(http.StatusOK, result)
 			return
 		}
 
 		status, _ := c.Get("status")
+		if status == nil {
+			fmt.Println(fmt.Sprint("no status is returned"))
+			c.JSON(http.StatusBadRequest, nil)
+			return
+		}
+
 		c.JSON(status.(int), result)
 	}
 }

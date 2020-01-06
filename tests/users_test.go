@@ -25,6 +25,23 @@ func TestUserSettingAndCheckingPassword(t *testing.T) {
 	asserts.NoError(err, "password should be checked and validated")
 }
 
+func TestGetUserByEmail(t *testing.T) {
+	asserts := getAsserts(t)
+	resetDb(true)
+
+	email := "userModel1@yahoo.com"
+	user, err := u.GetUserByEmail(email)
+
+	asserts.NoError(err, "no errors are returned when fetching user by email")
+	asserts.EqualValues(email, user.Email, "user fetched has the same email as the one used for getting user")
+
+	invalidEmail := "invalid@email.com"
+	user, err = u.GetUserByEmail(invalidEmail)
+
+	asserts.Error(err, "record not found")
+	asserts.Equal(0, user.ID, "no user is returned for the invalid email")
+}
+
 func TestCreateUserResolver(t *testing.T) {
 	asserts := getAsserts(t)
 	userValidator := u.NewUserValidator()
@@ -79,7 +96,7 @@ func TestCreateUserResolver(t *testing.T) {
 		})
 	}
 
-	t.Run("creates user and returns its ID", func(t *testing.T) {
+	t.Run("creates user and returns it", func(t *testing.T) {
 		args = map[string]interface{}{
 			"email": 			"test1@example.com",
 			"first_name":		"Test1",
@@ -91,11 +108,13 @@ func TestCreateUserResolver(t *testing.T) {
 		err = userValidator.ValidateForm(args)
 		asserts.Nil(err, "Form data validated and should not return error")
 
-		user := u.User{}
-		var id int
-		id, err = user.SaveEntity(&userValidator.UserModel)
-		asserts.Nil(err, "New user created with validated data")
-		asserts.Equal(1, id, "User has ID 1")
+		userModel := u.User{}
+		user, err := userModel.SaveEntity(userValidator.UserModel)
+
+		// Assert response return
+		asserts.Nil(err, "New userModel created with validated data")
+		asserts.Equal(1, user.ID, "User has ID 1")
+		asserts.IsType(u.User{}, user, "Should return object of interface User")
 	})
 
 	resetDb(false)
@@ -121,6 +140,7 @@ func TestGetUserResolver(t *testing.T) {
 		user, err = userEntity.GetEntityById(args["id"].(int))
 		asserts.Nil(err, "Successfully fetched user by ID, no erros")
 		asserts.Equalf(id, user.ID, "Successfully fetched user with ID %v", id)
+		asserts.IsType(u.User{}, user, "Should return object of User interface")
 	})
 
 	t.Run("returns nil for non-existing user", func(t *testing.T) {

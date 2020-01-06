@@ -56,6 +56,22 @@ var mutationType = g.NewObject(
 				Resolve: u.CreateUserResolver,
 				Description: "Create a new user",
 			},
+			"login": &g.Field{
+				Name: 			"Login",
+				Type: 			SessionType,
+				Args: 			g.FieldConfigArgument{
+					"email": 	&g.ArgumentConfig{
+						Type: 			g.NewNonNull(g.String),
+						Description:	"User email",
+					},
+					"password":	&g.ArgumentConfig{
+						Type:         	g.NewNonNull(g.String),
+						Description:  	"User password in plain text",
+					},
+				},
+				Resolve: 		u.AuthenticateUserResolver,
+				Description: 	"A login used by the user-facing site to create user JSON Web Token",
+			},
 		},
 	},
 )
