@@ -47,7 +47,7 @@ func initAPI() (*gin.Engine, *gorm.DB) {
 }
 
 func Migrate(db *gorm.DB) {
-	db.AutoMigrate(&u.User{})
+	db.AutoMigrate(u.User{})
 }
 
 func main() {
