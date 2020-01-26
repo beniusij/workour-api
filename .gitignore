@@ -10,3 +10,7 @@ docker/data/
 
 # Built executable
 /workour-api
+
+
+# Tests-related products
+gorm_test.db
