@@ -20,18 +20,6 @@ func init() {
 	}
 }
 
-func Migrate(db *gorm.DB) {
-	db.AutoMigrate(&u.User{})
-}
-
-func main() {
-	r, db := initAPI()
-	Migrate(db)
-	defer db.Close()
-
-	r.Run(":8080")
-}
-
 func initAPI() (*gin.Engine, *gorm.DB) {
 	db := comm.InitDb()
 	router := gin.Default()
@@ -56,4 +44,16 @@ func initAPI() (*gin.Engine, *gorm.DB) {
 	})
 
 	return router, db
+}
+
+func Migrate(db *gorm.DB) {
+	db.AutoMigrate(&u.User{})
+}
+
+func main() {
+	r, db := initAPI()
+	Migrate(db)
+	defer db.Close()
+
+	_ = r.Run(":8080")
 }
