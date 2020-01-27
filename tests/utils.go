@@ -63,7 +63,7 @@ func resetDb(addMock bool) {
 }
 
 func migrate() {
-	db.AutoMigrate(&u.User{})
+	db.AutoMigrate(u.User{})
 }
 
 // -------------------------------------------------------------------------

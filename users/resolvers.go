@@ -15,20 +15,22 @@ type Session struct {
 // Handles mutation to create a user
 func CreateUserResolver(p g.ResolveParams) (interface{}, error) {
 	userValidator := NewUserValidator()
-	user := &User{}
+	userStruct := &User{}
 	c := p.Context.(*gin.Context)
 
 	if err := userValidator.ValidateForm(p.Args); err != nil {
 		return nil, err
 	}
 
-	if _, err := user.SaveEntity(userValidator.UserModel); err != nil {
+	user, err := userStruct.SaveEntity(userValidator.UserModel)
+
+	if  err != nil {
 		return nil, err
 	}
 
 	c.Set("status", http.StatusCreated)
 
-	return userValidator.UserModel, nil
+	return user, nil
 }
 
 // GetUserResolver resolves our user query through a db call to GetEntityById
