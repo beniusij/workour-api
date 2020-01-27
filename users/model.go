@@ -52,16 +52,16 @@ func (u User) SaveEntity(data interface{}) (User, error) {
 	return user, nil
 }
 
-func (u User) GetEntityById(id int) (*User, error) {
+func (u User) GetEntityById(id int) (User, error) {
 	db := common.GetDB()
 	user := User{}
 	err := db.Where(&User{ID: id}).First(&user).Error
 
 	if err != nil {
-		return nil, err
+		return user, err
 	}
 
-	return &user, nil
+	return user, nil
 }
 
 func GetUserByEmail(email string) (User, error) {

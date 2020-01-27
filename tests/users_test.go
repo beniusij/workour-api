@@ -128,7 +128,7 @@ func TestGetUserResolver(t *testing.T) {
 		id		int
 		args 	map[string]interface{}
 		err		error
-		user	*u.User
+		user	u.User
 	)
 
 	t.Run("returns user with ID 1", func(t *testing.T) {
@@ -151,7 +151,7 @@ func TestGetUserResolver(t *testing.T) {
 
 		user, err = userEntity.GetEntityById(args["id"].(int))
 		expectedErr := errors.New("record not found")
-		asserts.Nil(user, "Attempt to fetch non-existent user returns nil for user")
+		asserts.Equal(0, user.ID, "Attempt to fetch non-existent user returns empty struct")
 		asserts.EqualError(err, expectedErr.Error(), "Attempt to fetch non-existent user should return an error")
 	})
 
