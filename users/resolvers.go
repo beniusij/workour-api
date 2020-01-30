@@ -22,7 +22,7 @@ func CreateUserResolver(p g.ResolveParams) (interface{}, error) {
 		return nil, err
 	}
 
-	user, err := userStruct.SaveEntity(userValidator.UserModel)
+	user, err := userStruct.Save(userValidator.UserModel)
 
 	if  err != nil {
 		return nil, err
@@ -33,12 +33,12 @@ func CreateUserResolver(p g.ResolveParams) (interface{}, error) {
 	return user, nil
 }
 
-// GetUserResolver resolves our user query through a db call to GetEntityById
+// GetUserResolver resolves our user query through a db call to GetById
 func GetUserResolver(p g.ResolveParams) (interface{}, error) {
 	user := User{}
 	id := p.Args["id"].(int)
 
-	user, err := user.GetEntityById(id)
+	user, err := user.GetById(id)
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +53,7 @@ func GetUserResolver(p g.ResolveParams) (interface{}, error) {
 func AuthenticateUserResolver(p g.ResolveParams) (interface{}, error) {
 	// Get user by email
 	email := p.Args["email"].(string)
-	user, err := GetUserByEmail(email)
+	user, err := GetByEmail(email)
 	if err != nil {
 		return nil, err
 	}
