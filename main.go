@@ -8,6 +8,7 @@ import (
 	"github.com/subosito/gotenv"
 	comm "workour-api/common"
 	g "workour-api/gql"
+	"workour-api/sessions"
 	u "workour-api/users"
 )
 
@@ -47,7 +48,10 @@ func initAPI() (*gin.Engine, *gorm.DB) {
 }
 
 func Migrate(db *gorm.DB) {
-	db.AutoMigrate(u.User{})
+	db.AutoMigrate(
+		u.User{},
+		sessions.Session{},
+	)
 }
 
 func main() {
