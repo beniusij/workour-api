@@ -39,7 +39,7 @@ var unauthRequestTestCases = []struct{
 		publicEndpoint,
 		"POST",
 		`{"query": "mutation { user: register(email: \"test@example.com\", first_name: \"Test\", last_name: \"Testest\", password: \"Password123\", password_confirm: \"Password123\") { ID } }"}`,
-		http.StatusBadRequest,
+		http.StatusOK,
 		"UNIQUE constraint failed: users.email",
 		"use of non-unique email should fail and return StatusBadRequest",
 	},
@@ -48,7 +48,7 @@ var unauthRequestTestCases = []struct{
 		publicEndpoint,
 		"POST",
 		`{"query": "mutation { user: register(email: \"test1\", first_name: \"Test\", last_name: \"Testest\", password: \"Password123\", password_confirm: \"Password123\") { ID } }"}`,
-		http.StatusBadRequest,
+		http.StatusOK,
 		"Error:Field validation for 'Email' failed on the 'email' tag",
 		"form with invalid email should fail and return StatusBadRequest",
 	},
@@ -57,7 +57,7 @@ var unauthRequestTestCases = []struct{
 		publicEndpoint,
 		"POST",
 		`{"query": "mutation { user: register(email: \"test1@example.com\", first_name: \"T\", last_name: \"Testst\", password: \"Password123\", password_confirm: \"Password123\") { ID } }"}`,
-		http.StatusBadRequest,
+		http.StatusOK,
 		`Field validation for 'FirstName' failed on the 'min' tag"`,
 		"form with invalid first name should fail and return StatusBadRequest",
 	},
@@ -66,7 +66,7 @@ var unauthRequestTestCases = []struct{
 		publicEndpoint,
 		"POST",
 		`{"query": "mutation { user: register(email: \"test1@example.com\", first_name: \"Test\", last_name: \"\", password: \"Password123\", password_confirm: \"Password123\") { ID } }"}`,
-		http.StatusBadRequest,
+		http.StatusOK,
 		`Field validation for 'LastName' failed on the 'required' tag"`,
 		"form with no last name should fail and return StatusBadRequest",
 	},
@@ -75,7 +75,7 @@ var unauthRequestTestCases = []struct{
 		publicEndpoint,
 		"POST",
 		`{"query": "mutation { user: register(email: \"test1@example.com\", first_name: \"Test\", last_name: \"Testest\", password: \"Password123\", password_confirm: \"Password12\") { ID } }"}`,
-		http.StatusBadRequest,
+		http.StatusOK,
 		`Field validation for 'PasswordConfirm' failed on the 'eqfield' tag"`,
 		"form with not matching passwords should fail and return StatusBadRequest",
 	},
@@ -83,7 +83,7 @@ var unauthRequestTestCases = []struct{
 
 func TestMain(m *testing.M) {
 	db = common.InitTestDb()
-	db.AutoMigrate(&u.User{})
+	db.AutoMigrate(u.User{})
 	exitval := m.Run()
 	_ = common.ResetTestDb(db)
 	os.Exit(exitval)

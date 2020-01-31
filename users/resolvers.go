@@ -15,28 +15,30 @@ type Session struct {
 // Handles mutation to create a user
 func CreateUserResolver(p g.ResolveParams) (interface{}, error) {
 	userValidator := NewUserValidator()
-	user := &User{}
+	userStruct := &User{}
 	c := p.Context.(*gin.Context)
 
 	if err := userValidator.ValidateForm(p.Args); err != nil {
 		return nil, err
 	}
 
-	if _, err := user.SaveEntity(userValidator.UserModel); err != nil {
+	user, err := userStruct.Save(userValidator.UserModel)
+
+	if  err != nil {
 		return nil, err
 	}
 
 	c.Set("status", http.StatusCreated)
 
-	return userValidator.UserModel, nil
+	return user, nil
 }
 
-// GetUserResolver resolves our user query through a db call to GetEntityById
+// GetUserResolver resolves our user query through a db call to GetById
 func GetUserResolver(p g.ResolveParams) (interface{}, error) {
-	user := &User{}
+	user := User{}
 	id := p.Args["id"].(int)
 
-	user, err := user.GetEntityById(id)
+	user, err := user.GetById(id)
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +53,7 @@ func GetUserResolver(p g.ResolveParams) (interface{}, error) {
 func AuthenticateUserResolver(p g.ResolveParams) (interface{}, error) {
 	// Get user by email
 	email := p.Args["email"].(string)
-	user, err := GetUserByEmail(email)
+	user, err := GetByEmail(email)
 	if err != nil {
 		return nil, err
 	}

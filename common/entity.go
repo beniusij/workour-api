@@ -2,6 +2,6 @@ package common
 
 // Entity interfaces describes the base
 type entity interface {
-	SaveEntity(data interface{}) (int, error)
-	GetEntityById(id int) (entity, error)
+	Save(data interface{}) (int, error)
+	GetById(id int) (entity, error)
 }

@@ -40,7 +40,7 @@ func (u *User) CheckPassword(password string) error {
 	return nil
 }
 
-func (u User) SaveEntity(data interface{}) (User, error) {
+func (u User) Save(data interface{}) (User, error) {
 	db := common.GetDB()
 	user := data.(User)
 	err := db.Create(&user).Error
@@ -52,19 +52,19 @@ func (u User) SaveEntity(data interface{}) (User, error) {
 	return user, nil
 }
 
-func (u User) GetEntityById(id int) (*User, error) {
+func (u User) GetById(id int) (User, error) {
 	db := common.GetDB()
 	user := User{}
 	err := db.Where(&User{ID: id}).First(&user).Error
 
 	if err != nil {
-		return nil, err
+		return user, err
 	}
 
-	return &user, nil
+	return user, nil
 }
 
-func GetUserByEmail(email string) (User, error) {
+func GetByEmail(email string) (User, error) {
 	db := common.GetDB()
 	user := User{}
 
