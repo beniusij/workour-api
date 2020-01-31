@@ -39,7 +39,7 @@ func TestGetByEmail(t *testing.T) {
 	user, err = u.GetByEmail(invalidEmail)
 
 	asserts.Error(err, "record not found")
-	asserts.Equal(0, user.ID, "no user is returned for the invalid email")
+	asserts.Equal(uint(0), user.ID, "no user is returned for the invalid email")
 }
 
 func TestCreateUserResolver(t *testing.T) {
@@ -109,12 +109,11 @@ func TestCreateUserResolver(t *testing.T) {
 		asserts.Nil(err, "Form data validated and should not return error")
 
 		userModel := u.User{}
-		user, err := userModel.Save(userValidator.UserModel)
+		userId, err := userModel.Save(userValidator.UserModel)
 
 		// Assert response return
 		asserts.Nil(err, "New userModel created with validated data")
-		asserts.Equal(1, user.ID, "User has ID 1")
-		asserts.IsType(u.User{}, user, "Should return object of interface User")
+		asserts.Equal(uint(1), userId, "User has ID 1")
 	})
 
 	resetDb(false)
@@ -125,7 +124,7 @@ func TestGetUserResolver(t *testing.T) {
 	userEntity := u.User{}
 	userMocker(10)
 	var (
-		id		int
+		id		uint
 		args 	map[string]interface{}
 		err		error
 		user	u.User
@@ -137,7 +136,7 @@ func TestGetUserResolver(t *testing.T) {
 			"id":	id,
 		}
 
-		user, err = userEntity.GetById(args["id"].(int))
+		user, err = userEntity.GetById(args["id"].(uint))
 		asserts.Nil(err, "Successfully fetched user by ID, no erros")
 		asserts.Equalf(id, user.ID, "Successfully fetched user with ID %v", id)
 		asserts.IsType(u.User{}, user, "Should return object of User interface")
@@ -149,9 +148,9 @@ func TestGetUserResolver(t *testing.T) {
 			"id": id,
 		}
 
-		user, err = userEntity.GetById(args["id"].(int))
+		user, err = userEntity.GetById(args["id"].(uint))
 		expectedErr := errors.New("record not found")
-		asserts.Equal(0, user.ID, "Attempt to fetch non-existent user returns empty struct")
+		asserts.Equal(uint(0), user.ID, "Attempt to fetch non-existent user returns empty struct")
 		asserts.EqualError(err, expectedErr.Error(), "Attempt to fetch non-existent user should return an error")
 	})
 

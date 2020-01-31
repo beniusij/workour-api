@@ -22,11 +22,13 @@ func CreateUserResolver(p g.ResolveParams) (interface{}, error) {
 		return nil, err
 	}
 
-	user, err := userStruct.Save(userValidator.UserModel)
+	userId, err := userStruct.Save(userValidator.UserModel)
 
 	if  err != nil {
 		return nil, err
 	}
+
+	user := User{ID: userId}
 
 	c.Set("status", http.StatusCreated)
 
@@ -36,7 +38,7 @@ func CreateUserResolver(p g.ResolveParams) (interface{}, error) {
 // GetUserResolver resolves our user query through a db call to GetById
 func GetUserResolver(p g.ResolveParams) (interface{}, error) {
 	user := User{}
-	id := p.Args["id"].(int)
+	id := p.Args["id"].(uint)
 
 	user, err := user.GetById(id)
 	if err != nil {
