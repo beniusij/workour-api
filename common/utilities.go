@@ -37,7 +37,7 @@ func NewValidationError(err error) CommonError {
 // This one should be private
 const NBSecretPassword = "This is 4 bl00dy s3cur3 p455w0rd!#"
 
-func GetToken(id int) string {
+func GetToken(id uint) string {
 	jwtToken := jwt.New(jwt.GetSigningMethod("HS256"))
 	// Set some claims
 	jwtToken.Claims = jwt.MapClaims{

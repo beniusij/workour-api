@@ -7,7 +7,7 @@ import (
 )
 
 type User struct {
-	ID				int		`gorm:"primary_key"`
+	ID				uint		`gorm:"primary_key"`
 	Email			string	`gorm:"column:email;type:varchar(100);unique_index"`
 	FirstName		string	`gorm:"column:first_name"`
 	LastName		string	`gorm:"column:last_name"`
@@ -40,19 +40,19 @@ func (u *User) CheckPassword(password string) error {
 	return nil
 }
 
-func (u User) Save(data interface{}) (User, error) {
+func (u User) Save(data interface{}) (uint, error) {
 	db := common.GetDB()
 	user := data.(User)
 	err := db.Create(&user).Error
 
 	if err != nil {
-		return user, err
+		return 0, err
 	}
 
-	return user, nil
+	return user.ID, nil
 }
 
-func (u User) GetById(id int) (User, error) {
+func (u User) GetById(id uint) (User, error) {
 	db := common.GetDB()
 	user := User{}
 	err := db.Where(&User{ID: id}).First(&user).Error
