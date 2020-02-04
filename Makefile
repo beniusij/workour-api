@@ -4,21 +4,15 @@ include .env
 
 .PHONY: create start stop
 
-create:
-	@docker create --name workour_db \
-	-p 5432:${DATABASE_PORT} \
-	-v ${PWD}/docker/data:/var/lib/postgresql/data \
-	-e POSTGRES_USER=${DATABASE_USER} \
-	-e POSTGRES_PASSWORD=${DATABASE_PSW} \
-	-e POSTGRES_DB=${DATABASE_NAME} \
-	postgres
-	@docker start workour_db
+build:
+	@docker volume create --name=workour_db
+	@docker-compose up --no-start
 
 start:
-	@docker start workour_db
+	@docker-compose up
 
 stop:
-	@docker stop workour_db
+	@docker-compose stop
 
 test:
 	go test ./tests

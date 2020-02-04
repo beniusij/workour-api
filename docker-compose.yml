@@ -1,0 +1,18 @@
+version: '3'
+services:
+  workour_db:
+    container_name: workour_db
+    image: ${DATABASE_IMAGE}
+    ports:
+      - 5432:${DATABASE_PORT}
+    volumes:
+      - ${PWD}/docker/postgres/data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=${DATABASE_USER}
+      - POSTGRES_PASSWORD=${DATABASE_PSW}
+      - POSTGRES_DB=${DATABASE_NAME}
+  workour_redis:
+    container_name: workour_redis
+    image: ${REDIS_IMAGE}
+    ports:
+      - 6379:${REDIS_PORT}
