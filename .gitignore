@@ -3,14 +3,16 @@
 
 # Vendor packages and dependencies
 vendor/
+tmp/
 
 # Sensitive files
 .env
-docker/data/
+
+# Docker-related files
+docker
 
 # Built executable
 /workour-api
-
 
 # Tests-related products
 gorm_test.db
