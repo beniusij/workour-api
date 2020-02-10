@@ -6,9 +6,9 @@ import (
 	"github.com/graphql-go/graphql"
 	"github.com/jinzhu/gorm"
 	"github.com/subosito/gotenv"
+	"workour-api/authentication"
 	comm "workour-api/common"
 	g "workour-api/gql"
-	"workour-api/sessions"
 	u "workour-api/users"
 )
 
@@ -33,10 +33,16 @@ func initAPI() (*gin.Engine, *gorm.DB) {
 			Mutation: rootQuery.Mutation,
 		},
 	)
+
 	if err != nil {
 		fmt.Println("error creating schema: ", err)
 	}
 
+	authController := new(authentication.Controller)
+
+	// Set up public level routes
+	router.POST("/login", authController.AuthenticateUser)
+	router.POST("/logout", authController.LogoutUser)
 	router.POST("/public", g.GraphQL(schema))
 	router.OPTIONS("/public", func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
@@ -44,13 +50,16 @@ func initAPI() (*gin.Engine, *gorm.DB) {
 		c.Writer.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, Accept-Encoding")
 	})
 
+	// Set up role-protected routes
+	admin := router.Group("/admin")
+	admin.Use(authentication.VerifyAuthentication())
+
 	return router, db
 }
 
 func Migrate(db *gorm.DB) {
 	db.AutoMigrate(
 		u.User{},
-		sessions.Session{},
 	)
 }
 

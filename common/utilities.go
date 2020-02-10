@@ -44,7 +44,7 @@ func GetToken(id uint) string {
 		"id":	id,
 		"exp":	time.Now().Add(time.Hour * 24).Unix(),
 	}
-	// Sign and get the complete encoded token as a string
+	// Sign and get the complete encoded Token as a string
 	token, _ := jwtToken.SignedString([]byte(NBSecretPassword))
 	return token
 }
