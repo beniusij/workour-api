@@ -2,12 +2,9 @@ package tests
 
 import (
 	"bytes"
-	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
-	"strings"
 	"testing"
 	"workour-api/common"
 	u "workour-api/users"
@@ -107,87 +104,6 @@ func TestWithoutAuth(t *testing.T) {
 
 			asserts.Equal(tc.expectedCode, response.Code, "Response Status - "+tc.msg)
 			asserts.Regexp(tc.responseRegex, response.Body.String(), "Response Content - "+tc.msg)
-		})
-	}
-}
-
-const tokenType = "Bearer"
-var loginTestCases = []struct{
-	url				string
-	msg				string
-	query			string
-	expectedCode	int
-	Email			string
-	isAuth			bool
-}{
-	{
-		publicEndpoint,
-		"form with correct credentials should return response with JWT token and user's name and email",
-		`{"query": "mutation { user: login(email: \"userModel1@yahoo.com\", password: \"Password123\") { Email, Token } }"}`,
-		200,
-		"userModel1@yahoo.com",
-		true,
-	},
-	{
-		publicEndpoint,
-		"form with incorrect credentials should return response without user and JWT",
-		`{"query": "mutation { user: login(email: \"userModel2@yahoo.com\", password: \"<p disabled>Incorrect psw</p>\") { Email, Token } }"}`,
-		200,
-		"",
-		false,
-	},
-	{
-		publicEndpoint,
-		"form with incorrect credentials should return response without user and JWT",
-		`{"query": "mutation { user: login(email: \"\", password: \"\") { Email, Token } }"}`,
-		200,
-		"",
-		false,
-	},
-}
-
-
-// Struct to unmarshal response body
-type RespData struct {
-	Data struct {
-		User struct {
-			Email string
-			Token string
-		} `json:"user"`
-	} `json:"data"`
-}
-
-func TestAuthentication(t *testing.T) {
-	asserts := getAsserts(t)
-	r := initTestAPI()
-	resetDb(true)
-	var resp RespData
-
-	for _, tc := range loginTestCases {
-		t.Run(tc.msg, func(t *testing.T) {
-			query := tc.query
-			request, err := http.NewRequest("POST", tc.url, bytes.NewBufferString(query))
-			asserts.NoError(err)
-			request.Header.Set("Content-Type", "application/json")
-
-			response := httptest.NewRecorder()
-			r.ServeHTTP(response, request)
-
-			// Assert response status code
-			asserts.Equal(tc.expectedCode, response.Code, fmt.Sprintf("Response Status - %s", tc.msg))
-
-			respBody := response.Body.String()
-			if strings.Contains(respBody, `"data":{"user":null}`) {
-				asserts.Contains(respBody, "incorrect email and/or password", "Contains correct error message")
-
-				resp = RespData{}
-			} else {
-				err = json.Unmarshal(response.Body.Bytes(), &resp)
-				asserts.NoError(err)
-
-				asserts.Equal(tc.Email, resp.Data.User.Email, fmt.Sprintf("Response Content - %s", tc.msg))
-				asserts.Regexp(TokenRegex, resp.Data.User.Token, "JWT token matches token regex")
-			}
 		})
 	}
 }
