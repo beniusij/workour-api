@@ -10,7 +10,6 @@ jobs:
       uses: shogo82148/actions-setup-redis@v1
       with:
         redis-version: '5.0.7'
-      run: redis-cli ping
 
     - name: Set up Go 1.13
       uses: actions/setup-go@v1
