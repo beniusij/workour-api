@@ -7,7 +7,8 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
-	"workour-api/authentication"
+	auth "workour-api/authentication"
+	"workour-api/common"
 )
 
 
@@ -40,7 +41,8 @@ func TestAuthenticateUSer(t *testing.T) {
 
 	// Set up router for testing
 	router := gin.Default()
-	router.POST("/login", authentication.Controller{}.AuthenticateUser)
+	common.InitSessionStore(router, "localhost:6379")
+	router.POST("/login", auth.Controller{}.AuthenticateUser)
 
 	for _, testCase := range loginTestCases {
 		t.Run(testCase.msg, func(t *testing.T) {
@@ -59,13 +61,11 @@ func TestAuthenticateUSer(t *testing.T) {
 			body := response.Body.String()
 			if !strings.Contains(body, "Incorrect email and/or password") {
 				cookie := response.Header().Get("Set-cookie")
-				asserts.True(strings.Contains(cookie, "Bearer"))
+				asserts.True(strings.Contains(cookie, tokenType))
 				asserts.True(strings.Contains(cookie, "Secure"))
 				asserts.True(strings.Contains(cookie, "HttpOnly"))
 				asserts.True(strings.Contains(cookie, "SameSite=lax"))
 			}
 		})
 	}
-
-
 }

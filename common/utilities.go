@@ -1,38 +1,9 @@
 package common
 
 import (
-	"fmt"
 	"github.com/dgrijalva/jwt-go"
-	"gopkg.in/go-playground/validator.v8"
 	"time"
 )
-
-type CommonError struct {
-	Errors map[string]interface{} `json:"errors"`
-}
-
-func NewError(key string, err error) CommonError {
-	res := CommonError{}
-	res.Errors = make(map[string]interface{})
-	res.Errors[key] = err.Error()
-	return res
-}
-
-func NewValidationError(err error) CommonError {
-	res := CommonError{}
-	res.Errors = make(map[string]interface{})
-	errs := err.(validator.ValidationErrors)
-
-	for _, v := range errs {
-		if v.Param != "" {
-			res.Errors[v.Field] = fmt.Sprintf("{%v: %v}", v.Tag, v.Param)
-		} else {
-			res.Errors[v.Field] = fmt.Sprintf("{key: %v}", v.Tag)
-		}
-	}
-
-	return res
-}
 
 // This one should be private
 const NBSecretPassword = "This is 4 bl00dy s3cur3 p455w0rd!#"

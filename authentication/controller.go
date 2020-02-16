@@ -3,6 +3,7 @@ package authentication
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"workour-api/users"
@@ -12,6 +13,12 @@ type Controller struct {}
 type Creds 		struct {
 	Email 		string
 	Password 	string
+}
+type Profile 	struct {
+	Id			uint
+	Email 		string
+	FirstName 	string
+	LastName 	string
 }
 
 // Authentication handler that accepts user details
@@ -29,9 +36,20 @@ func (ctrl Controller) AuthenticateUser(c *gin.Context) {
 	interruptAuthentication(c, err)
 
 	// Create token
-	authTokenStruct := AuthToken{};
+	authTokenStruct := AuthToken{}
 	token, err := authTokenStruct.GenerateToken(user)
 	interruptAuthentication(c, err)
+
+	// Store session in persistence cache
+	session := sessions.Default(c)
+	profile, _ := json.Marshal(&Profile{
+		Id:			user.ID,
+		Email:     	user.Email,
+		FirstName: 	user.FirstName,
+		LastName:  	user.LastName,
+	})
+	session.Set(token, profile)
+	session.Save()
 
 	// Return response with Authorization header set
 	cookie := fmt.Sprintf(
@@ -52,10 +70,10 @@ func (ctrl Controller) LogoutUser(c *gin.Context) {
 
 func interruptAuthentication(c *gin.Context, err error) {
 	if err != nil {
-		fmt.Print(err)
 		c.JSON(http.StatusOK, gin.H{
 			"message": "Incorrect email and/or password",
 		})
 		c.Abort()
+		return
 	}
 }

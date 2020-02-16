@@ -6,7 +6,8 @@ import (
 	"github.com/graphql-go/graphql"
 	"github.com/jinzhu/gorm"
 	"github.com/subosito/gotenv"
-	"workour-api/authentication"
+	"os"
+	auth "workour-api/authentication"
 	comm "workour-api/common"
 	g "workour-api/gql"
 	u "workour-api/users"
@@ -21,9 +22,29 @@ func init() {
 	}
 }
 
+func main() {
+	r, db := initAPI()
+	Migrate(db)
+	defer db.Close()
+
+	_ = r.Run(":8080")
+}
+
+func Migrate(db *gorm.DB) {
+	db.AutoMigrate(
+		u.User{},
+	)
+}
+
 func initAPI() (*gin.Engine, *gorm.DB) {
 	db := comm.InitDb()
 	router := gin.Default()
+
+	// Set up Redis client for sessions
+	redisHost := os.Getenv("REDIS_HOST")
+	redisPort := os.Getenv("REDIS_PORT")
+	address := fmt.Sprintf("%s:%s", redisHost, redisPort)
+	comm.InitSessionStore(router, address)
 
 	rootQuery := g.NewRoot()
 	// Create a new graphql schema, passing in the root query
@@ -38,7 +59,7 @@ func initAPI() (*gin.Engine, *gorm.DB) {
 		fmt.Println("error creating schema: ", err)
 	}
 
-	authController := new(authentication.Controller)
+	authController := new(auth.Controller)
 
 	// Set up public level routes
 	router.POST("/login", authController.AuthenticateUser)
@@ -52,21 +73,8 @@ func initAPI() (*gin.Engine, *gorm.DB) {
 
 	// Set up role-protected routes
 	admin := router.Group("/admin")
-	admin.Use(authentication.VerifyAuthentication())
+	admin.Use(auth.VerifyAuthentication())
 
 	return router, db
 }
 
-func Migrate(db *gorm.DB) {
-	db.AutoMigrate(
-		u.User{},
-	)
-}
-
-func main() {
-	r, db := initAPI()
-	Migrate(db)
-	defer db.Close()
-
-	_ = r.Run(":8080")
-}
