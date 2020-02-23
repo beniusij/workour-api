@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 	auth "workour-api/authentication"
-	"workour-api/common"
+	"workour-api/config"
 )
 
 
@@ -41,7 +41,7 @@ func TestAuthenticateUser(t *testing.T) {
 
 	// Set up router for testing
 	router := gin.Default()
-	common.InitSessionStore(router)
+	config.SetupSessionStorage(router)
 
 	// Login route to test login action in controller
 	router.POST("/login", auth.Controller{}.AuthenticateUser)
@@ -79,7 +79,7 @@ func TestAuthenticateUser(t *testing.T) {
 //
 //	// Set up router for testing
 //	router := gin.Default()
-//	common.InitSessionStore(router)
+//	lib.SetupSessionStorage(router)
 //
 //	// Login route to test login action in controller
 //	router.POST("/login", auth.Controller{}.AuthenticateUser)

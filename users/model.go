@@ -3,7 +3,7 @@ package users
 import (
 	"errors"
 	"golang.org/x/crypto/bcrypt"
-	"workour-api/common"
+	"workour-api/config"
 )
 
 type User struct {
@@ -41,7 +41,7 @@ func (u *User) CheckPassword(password string) error {
 }
 
 func (u User) Save(data interface{}) (uint, error) {
-	db := common.GetDB()
+	db := config.GetDB()
 	user := data.(User)
 	err := db.Create(&user).Error
 
@@ -53,7 +53,7 @@ func (u User) Save(data interface{}) (uint, error) {
 }
 
 func (u User) GetById(id uint) (User, error) {
-	db := common.GetDB()
+	db := config.GetDB()
 	user := User{}
 	err := db.Where(&User{ID: id}).First(&user).Error
 
@@ -65,7 +65,7 @@ func (u User) GetById(id uint) (User, error) {
 }
 
 func GetByEmail(email string) (User, error) {
-	db := common.GetDB()
+	db := config.GetDB()
 	user := User{}
 
 	err := db.Where("email = ?", email).Find(&user).Error

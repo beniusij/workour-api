@@ -5,7 +5,6 @@ import (
 	"github.com/jinzhu/gorm"
 	"github.com/subosito/gotenv"
 	"os"
-	comm "workour-api/common"
 	"workour-api/config"
 	u "workour-api/users"
 )
@@ -39,13 +38,13 @@ func Migrate(db *gorm.DB) {
 }
 
 func initAPI() (*gin.Engine, *gorm.DB) {
-	db := comm.InitDb()
+	db := config.InitDb()
 	router := gin.Default()
 
 	// Set up Redis client for sessions
-	comm.InitSessionStore(router)
+	config.SetupSessionStorage(router)
 
-	config.SetupRoutes(router)
+	SetupRoutes(router)
 
 	return router, db
 }

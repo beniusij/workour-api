@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"testing"
-	"workour-api/common"
+	"workour-api/config"
 	u "workour-api/users"
 )
 
@@ -79,10 +79,10 @@ var unauthRequestTestCases = []struct{
 }
 
 func TestMain(m *testing.M) {
-	db = common.InitTestDb()
+	db = config.InitTestDb()
 	db.AutoMigrate(u.User{})
 	exitval := m.Run()
-	_ = common.ResetTestDb(db)
+	_ = config.ResetTestDb(db)
 	os.Exit(exitval)
 }
 

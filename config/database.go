@@ -1,10 +1,7 @@
-package common
+package config
 
 import (
 	"fmt"
-	"github.com/gin-contrib/sessions"
-	"github.com/gin-contrib/sessions/redis"
-	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
@@ -60,14 +57,4 @@ func ResetTestDb(db *gorm.DB) error {
 	db.Close()
 	err := os.Remove(testDbPath)
 	return err
-}
-
-// Initialise persistence cache with Redis
-func InitSessionStore(r *gin.Engine, address string) {
-	store, err := redis.NewStore(10, "tcp", address, "")
-	if err != nil {
-		panic(err)
-	}
-
-	r.Use(sessions.Sessions("auth_sessions", store))
 }

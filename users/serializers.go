@@ -2,7 +2,7 @@ package users
 
 import (
 	"github.com/gin-gonic/gin"
-	"workour-api/common"
+	"workour-api/lib"
 )
 
 type UserSerializer struct {
@@ -22,7 +22,7 @@ func (u *UserSerializer) Response() UserResponse {
 		Email:     userModel.Email,
 		FirstName: userModel.FirstName,
 		LastName:  userModel.LastName,
-		Token:     common.GetToken(userModel.ID),
+		Token:     lib.GetToken(userModel.ID),
 	}
 	return user
 }
