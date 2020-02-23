@@ -35,15 +35,18 @@ var loginTestCases = []struct{
 	},
 }
 
-func TestAuthenticateUSer(t *testing.T) {
+func TestAuthenticateUser(t *testing.T) {
 	asserts := getAsserts(t)
 	resetDb(true)
 
 	// Set up router for testing
 	router := gin.Default()
-	common.InitSessionStore(router, "localhost:6379")
+	common.InitSessionStore(router)
+
+	// Login route to test login action in controller
 	router.POST("/login", auth.Controller{}.AuthenticateUser)
 
+	// Test authentication
 	for _, testCase := range loginTestCases {
 		t.Run(testCase.msg, func(t *testing.T) {
 			request, err := http.NewRequest(
@@ -69,3 +72,54 @@ func TestAuthenticateUSer(t *testing.T) {
 		})
 	}
 }
+
+//func TestAuthenticatedSessionStoredInSessionStorage(t *testing.T) {
+//	//asserts := getAsserts(t)
+//	resetDb(true)
+//
+//	// Set up router for testing
+//	router := gin.Default()
+//	common.InitSessionStore(router)
+//
+//	// Login route to test login action in controller
+//	router.POST("/login", auth.Controller{}.AuthenticateUser)
+//
+//	// Stub route to test if authenticated user session is stored in session store
+//	router.GET("/get", func(c *gin.Context) {
+//		// Get token from request body
+//		token := c.Request.URL.Query().Get("token")
+//
+//		// Get value from store using token as key
+//		session := sessions.Default(c)
+//		fmt.Println(token)
+//		p := session.Get(token)
+//		if  p == nil {
+//			t.Errorf("Not found for %s", token)
+//		}
+//		session.Save()
+//	})
+//
+//	// First authenticate a user
+//	request, _ := http.NewRequest(
+//		"POST",
+//		"/login",
+//		bytes.NewBufferString(loginTestCases[0].params),
+//	)
+//	request.Header.Set("Content-Type", "application/json")
+//	response := httptest.NewRecorder()
+//	router.ServeHTTP(response, request)
+//
+//	// Get token from response header
+//	cookie := response.Header().Get("Set-cookie")
+//	splitCookie := strings.Split(cookie, " ")
+//	token := strings.Trim(splitCookie[1], ";")
+//
+//	// Try to get user profile from the session storage using token
+//	request, _ = http.NewRequest(
+//		"GET",
+//		fmt.Sprintf("/get?token=%s", token),
+//		nil,
+//	)
+//	response = httptest.NewRecorder()
+//	router.ServeHTTP(response, request)
+//}
