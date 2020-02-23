@@ -42,7 +42,7 @@ func initAPI() (*gin.Engine, *gorm.DB) {
 	router := gin.Default()
 
 	// Set up Redis client for sessions
-	config.SetupSessionStorage(router)
+	config.SetupSessionStorage()
 
 	SetupRoutes(router)
 

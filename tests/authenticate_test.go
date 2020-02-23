@@ -2,6 +2,7 @@ package tests
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"net/http/httptest"
@@ -41,7 +42,7 @@ func TestAuthenticateUser(t *testing.T) {
 
 	// Set up router for testing
 	router := gin.Default()
-	config.SetupSessionStorage(router)
+	config.SetupSessionStorage()
 
 	// Login route to test login action in controller
 	router.POST("/login", auth.Controller{}.AuthenticateUser)
@@ -73,53 +74,54 @@ func TestAuthenticateUser(t *testing.T) {
 	}
 }
 
-//func TestAuthenticatedSessionStoredInSessionStorage(t *testing.T) {
-//	//asserts := getAsserts(t)
-//	resetDb(true)
-//
-//	// Set up router for testing
-//	router := gin.Default()
-//	lib.SetupSessionStorage(router)
-//
-//	// Login route to test login action in controller
-//	router.POST("/login", auth.Controller{}.AuthenticateUser)
-//
-//	// Stub route to test if authenticated user session is stored in session store
-//	router.GET("/get", func(c *gin.Context) {
-//		// Get token from request body
-//		token := c.Request.URL.Query().Get("token")
-//
-//		// Get value from store using token as key
-//		session := sessions.Default(c)
-//		fmt.Println(token)
-//		p := session.Get(token)
-//		if  p == nil {
-//			t.Errorf("Not found for %s", token)
-//		}
-//		session.Save()
-//	})
-//
-//	// First authenticate a user
-//	request, _ := http.NewRequest(
-//		"POST",
-//		"/login",
-//		bytes.NewBufferString(loginTestCases[0].params),
-//	)
-//	request.Header.Set("Content-Type", "application/json")
-//	response := httptest.NewRecorder()
-//	router.ServeHTTP(response, request)
-//
-//	// Get token from response header
-//	cookie := response.Header().Get("Set-cookie")
-//	splitCookie := strings.Split(cookie, " ")
-//	token := strings.Trim(splitCookie[1], ";")
-//
-//	// Try to get user profile from the session storage using token
-//	request, _ = http.NewRequest(
-//		"GET",
-//		fmt.Sprintf("/get?token=%s", token),
-//		nil,
-//	)
-//	response = httptest.NewRecorder()
-//	router.ServeHTTP(response, request)
-//}
+func TestAuthenticatedSessionStoredInSessionStorage(t *testing.T) {
+	resetDb(true)
+
+	// Set up router for testing
+	router := gin.Default()
+	config.SetupSessionStorage()
+
+	// Login route to test login action in controller
+	router.POST("/login", auth.Controller{}.AuthenticateUser)
+
+	// Stub route to test if authenticated user session is stored in session store
+	router.GET("/get", func(c *gin.Context) {
+		asserts := getAsserts(t)
+		// Get token from request body
+		token := c.Request.URL.Query().Get("token")
+
+		// Get value from store using token as key
+		store := config.GetSessionStorage()
+		session, err := store.Get(c.Request, token)
+
+		if  err != nil {
+			t.Errorf("Error found while getting session: %s", err.Error())
+		}
+
+		asserts.False(session.IsNew)
+	})
+
+	// First authenticate a user
+	request, _ := http.NewRequest(
+		"POST",
+		"/login",
+		bytes.NewBufferString(loginTestCases[0].params),
+	)
+	request.Header.Set("Content-Type", "application/json")
+	response := httptest.NewRecorder()
+	router.ServeHTTP(response, request)
+
+	// Get token from response header
+	cookie := response.Header().Get("Set-cookie")
+	splitCookie := strings.Split(cookie, " ")
+	token := strings.Trim(splitCookie[1], ";")
+
+	// Try to get user profile from the session storage using token
+	request, _ = http.NewRequest(
+		"GET",
+		fmt.Sprintf("/get?token=%s", token),
+		nil,
+	)
+	response = httptest.NewRecorder()
+	router.ServeHTTP(response, request)
+}

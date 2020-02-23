@@ -3,9 +3,10 @@ package authentication
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
+	"workour-api/config"
 	"workour-api/users"
 )
 
@@ -38,10 +39,11 @@ func (ctrl Controller) AuthenticateUser(c *gin.Context) {
 	// Create token
 	authTokenStruct := AuthToken{}
 	token, err := authTokenStruct.GenerateToken(user)
+	token = "the-key"
 	interruptAuthentication(c, err)
 
 	// Store session in persistence cache
-	session := sessions.Default(c)
+	store := config.GetSessionStorage()
 	profile, _ := json.Marshal(&Profile{
 		Id:			user.ID,
 		Email:     	user.Email,
@@ -49,10 +51,16 @@ func (ctrl Controller) AuthenticateUser(c *gin.Context) {
 		LastName:  	user.LastName,
 	})
 
-	session.Set(token, profile)
-	err = session.Save()
+	// Get session with key
+	session, err := store.Get(c.Request, token)
 	if err != nil {
-		panic(err)
+		log.Fatal(err.Error())
+	}
+
+	// Set and save new values to session
+	session.Values[token] = string(profile)
+	if err = session.Save(c.Request, c.Writer); err != nil {
+		log.Fatalf("Error saving session: %v", err)
 	}
 
 	// Return response with Authorization header set
