@@ -48,8 +48,12 @@ func (ctrl Controller) AuthenticateUser(c *gin.Context) {
 		FirstName: 	user.FirstName,
 		LastName:  	user.LastName,
 	})
+
 	session.Set(token, profile)
-	session.Save()
+	err = session.Save()
+	if err != nil {
+		panic(err)
+	}
 
 	// Return response with Authorization header set
 	cookie := fmt.Sprintf(
