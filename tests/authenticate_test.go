@@ -2,7 +2,6 @@ package tests
 
 import (
 	"bytes"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"net/http/httptest"
@@ -87,12 +86,10 @@ func TestAuthenticatedSessionStoredInSessionStorage(t *testing.T) {
 	// Stub route to test if authenticated user session is stored in session store
 	router.GET("/get", func(c *gin.Context) {
 		asserts := getAsserts(t)
-		// Get token from request body
-		token := c.Request.URL.Query().Get("token")
 
 		// Get value from store using token as key
 		store := config.GetSessionStorage()
-		session, err := store.Get(c.Request, token)
+		session, err := store.Get(c.Request, auth.CookieName)
 
 		if  err != nil {
 			t.Errorf("Error found while getting session: %s", err.Error())
@@ -112,16 +109,16 @@ func TestAuthenticatedSessionStoredInSessionStorage(t *testing.T) {
 	router.ServeHTTP(response, request)
 
 	// Get token from response header
-	cookie := response.Header().Get("Set-cookie")
-	splitCookie := strings.Split(cookie, " ")
-	token := strings.Trim(splitCookie[1], ";")
+	cookie := response.Header().Get("Set-Cookie")
 
 	// Try to get user profile from the session storage using token
 	request, _ = http.NewRequest(
 		"GET",
-		fmt.Sprintf("/get?token=%s", token),
+		"/get",
 		nil,
 	)
+
+	request.Header.Add("Cookie", cookie)
 	response = httptest.NewRecorder()
 	router.ServeHTTP(response, request)
 }

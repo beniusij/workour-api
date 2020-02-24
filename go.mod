@@ -7,6 +7,7 @@ require (
 	github.com/garyburd/redigo v1.6.0 // indirect
 	github.com/gin-contrib/sessions v0.0.3
 	github.com/gin-gonic/gin v1.5.0
+	github.com/gorilla/sessions v1.1.3
 	github.com/graphql-go/graphql v0.7.8
 	github.com/jinzhu/gorm v1.9.12
 	github.com/stretchr/testify v1.4.0

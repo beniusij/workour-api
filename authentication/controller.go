@@ -2,13 +2,15 @@ package authentication
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/sessions"
 	"log"
 	"net/http"
 	"workour-api/config"
 	"workour-api/users"
 )
+
+const CookieName = "WRKSESSID"
 
 type Controller struct {}
 type Creds 		struct {
@@ -39,36 +41,26 @@ func (ctrl Controller) AuthenticateUser(c *gin.Context) {
 	// Create token
 	authTokenStruct := AuthToken{}
 	token, err := authTokenStruct.GenerateToken(user)
-	token = "the-key"
 	interruptAuthentication(c, err)
 
 	// Store session in persistence cache
 	store := config.GetSessionStorage()
-	profile, _ := json.Marshal(&Profile{
-		Id:			user.ID,
-		Email:     	user.Email,
-		FirstName: 	user.FirstName,
-		LastName:  	user.LastName,
-	})
 
-	// Get session with key
-	session, err := store.Get(c.Request, token)
+	// Create new session with key
+	session, err := store.New(c.Request, CookieName)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
+	// Set session cookie value
+	session.ID = token
+
+
 	// Set and save new values to session
-	session.Values[token] = string(profile)
+	updateSession(session, user)
 	if err = session.Save(c.Request, c.Writer); err != nil {
 		log.Fatalf("Error saving session: %v", err)
 	}
-
-	// Return response with Authorization header set
-	cookie := fmt.Sprintf(
-		"Bearer %s; Secure; HttpOnly; SameSite=lax",
-		token,
-	)
-	c.Writer.Header().Set("Set-cookie", cookie)
 }
 
 // Get token from authorization header
@@ -78,6 +70,14 @@ func (ctrl Controller) GetUserProfile(c *gin.Context) {
 
 // Delete session associated with Authorization token in Redis
 func (ctrl Controller) LogoutUser(c *gin.Context) {
+}
+
+// Update session with user details
+func updateSession(s *sessions.Session, u users.User) {
+	s.Values["id"] = u.ID
+	s.Values["email"] = u.Email
+	s.Values["first_name"] = u.FirstName
+	s.Values["last_name"] = u.LastName
 }
 
 func interruptAuthentication(c *gin.Context, err error) {
