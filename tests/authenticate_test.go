@@ -63,11 +63,10 @@ func TestAuthenticateUser(t *testing.T) {
 
 			body := response.Body.String()
 			if !strings.Contains(body, "Incorrect email and/or password") {
-				cookie := response.Header().Get("Set-cookie")
-				asserts.True(strings.Contains(cookie, tokenType))
-				asserts.True(strings.Contains(cookie, "Secure"))
-				asserts.True(strings.Contains(cookie, "HttpOnly"))
-				asserts.True(strings.Contains(cookie, "SameSite=lax"))
+				cookie := response.Header().Get("Set-Cookie")
+				asserts.True(strings.Contains(cookie, "Secure"), "Cookie should be Secure")
+				asserts.True(strings.Contains(cookie, "HttpOnly"), "Cookie should be HttpOnly")
+				asserts.True(strings.Contains(cookie, "SameSite=Lax"), "Cookie should have SameSite=lax")
 			}
 		})
 	}

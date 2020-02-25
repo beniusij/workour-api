@@ -54,8 +54,15 @@ func (ctrl Controller) AuthenticateUser(c *gin.Context) {
 
 	// Set session cookie value
 	session.ID = token
-
-
+	session.Options = &sessions.Options{
+		Path:     "/",
+		Domain:   "",
+		MaxAge:   3600 * 24,
+		Secure:   true,
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
+	}
+	
 	// Set and save new values to session
 	updateSession(session, user)
 	if err = session.Save(c.Request, c.Writer); err != nil {
