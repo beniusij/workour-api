@@ -66,17 +66,39 @@ func (ctrl Controller) AuthenticateUser(c *gin.Context) {
 	// Set and save new values to session
 	updateSession(session, user)
 	if err = session.Save(c.Request, c.Writer); err != nil {
-		log.Fatalf("Error saving session: %v", err)
+		c.JSON(http.StatusOK, gin.H{
+			"message": "Could not save session",
+		})
+		c.Abort()
 	}
 }
 
 // Get token from authorization header
 // And get user details from session stored in Redis
-func (ctrl Controller) GetUserProfile(c *gin.Context) {
+func (ctrl Controller) GetCurrentUser(c *gin.Context) {
 }
 
 // Delete session associated with Authorization token in Redis
 func (ctrl Controller) LogoutUser(c *gin.Context) {
+	store := config.GetSessionStorage()
+
+	// Get session
+	session, err := store.Get(c.Request, CookieName)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "Could not get session",
+		})
+		c.Abort()
+	}
+
+	// Set session.Options.MaxAge = -1 and save to delete the session
+	session.Options.MaxAge = -1
+	if err = session.Save(c.Request, c.Writer); err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "Could not save session",
+		})
+		c.Abort()
+	}
 }
 
 // Update session with user details

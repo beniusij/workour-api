@@ -3,6 +3,7 @@ package tests
 import (
 	"bytes"
 	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -120,4 +121,53 @@ func TestAuthenticatedSessionStoredInSessionStorage(t *testing.T) {
 	request.Header.Add("Cookie", cookie)
 	response = httptest.NewRecorder()
 	router.ServeHTTP(response, request)
+}
+
+func TestUserCanLogout(t *testing.T) {
+	resetDb(true)
+	config.SetupSessionStorage()
+	asserts := getAsserts(t)
+
+	// Set up router and session storage
+	router := gin.Default()
+	store := config.GetSessionStorage()
+
+	// Add routes
+	router.POST("/login", auth.Controller{}.AuthenticateUser)
+	router.POST("/logout", auth.Controller{}.LogoutUser)
+
+	// Authenticate user
+	request, _ := http.NewRequest(
+		"POST",
+		"/login",
+		bytes.NewBufferString(loginTestCases[0].params),
+	)
+	request.Header.Set("Content-Type", "application/json")
+	response := httptest.NewRecorder()
+	router.ServeHTTP(response, request)
+
+	// Prep for logout
+	request, _ = http.NewRequest("POST", "/logout", nil)
+	request.Header.Add("Cookie", response.Header().Get("Set-Cookie"))
+	response = httptest.NewRecorder()
+
+	// Check that session is created
+	session, err := store.Get(request, auth.CookieName)
+	if err != nil {
+		log.Print(err)
+	}
+
+	asserts.False(session.IsNew, "Session is created and it is in Redis")
+	asserts.Equal("userModel1@yahoo.com", session.Values["email"])
+
+	// Log out user
+	router.ServeHTTP(response, request)
+
+	// Check that session is created
+	session, err = store.Get(request, auth.CookieName)
+	if err != nil {
+		log.Print(err)
+	}
+
+	asserts.Equal(-1, session.Options.MaxAge, "Session is destroyed and user is no longer authenticated")
 }
