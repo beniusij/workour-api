@@ -32,6 +32,7 @@ func publicRoutes(r *gin.Engine) {
 
 	r.POST("/login", authController.AuthenticateUser)
 	r.POST("/logout", authController.LogoutUser)
+	r.GET("/getCurrentUser")
 	r.POST("/public", g.GraphQL(schema))
 	r.OPTIONS("/public", func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
