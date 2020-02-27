@@ -2,6 +2,7 @@ package authentication
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/sessions"
 	"log"
@@ -86,9 +87,29 @@ func (ctrl Controller) AuthenticateUser(c *gin.Context) {
 	}
 }
 
-// Get token from authorization header
-// And get user details from session stored in Redis
+// Get user details from session stored in Redis
 func (ctrl Controller) GetCurrentUser(c *gin.Context) {
+	store := config.GetSessionStorage()
+	session, err := store.Get(c.Request, CookieName)
+	if err != nil {
+		log.Println(fmt.Sprintf("Error occurred while getting current user: %v", err))
+	}
+
+	profile := Profile{
+		Id: session.Values["id"].(uint),
+		Email: session.Values["email"].(string),
+		FirstName: session.Values["first_name"].(string),
+		LastName: session.Values["last_name"].(string),
+	}
+
+	profileJson, err := json.Marshal(&profile)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Failed to parse profile into JSON",
+		})
+	}
+
+	c.JSON(http.StatusOK, string(profileJson))
 }
 
 // Delete session associated with Authorization token in Redis

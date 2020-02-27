@@ -252,6 +252,30 @@ func TestSessionAuthenticationMiddleware(t *testing.T) {
 	asserts.True(strings.Contains(response.Body.String(), "Request received"))
 }
 
+func TestGetCurrentUser(t *testing.T) {
+	resetDb(true)
+	config.SetupSessionStorage()
+	asserts := getAsserts(t)
+
+	router := gin.Default()
+	router.POST("/login", auth.Controller{}.AuthenticateUser)
+	router.GET("/getCurrentUser", auth.Controller{}.GetCurrentUser)
+
+	// Log in as user
+	cookie := authTestUser(router)
+
+	// Get current authenticated user
+	request, _ := http.NewRequest("GET", "/getCurrentUser", nil)
+	request.Header.Add("Cookie", cookie)
+	response := httptest.NewRecorder()
+	router.ServeHTTP(response, request)
+
+	// Assert result
+	result := response.Body.String()
+	asserts.Equal(http.StatusOK, response.Code, "Response with HTTP code 200 returned")
+	asserts.True(strings.Contains(result, "userModel1@yahoo.com"))
+}
+
 func logErr(err error) {
 	if err != nil {
 		log.Println(fmt.Sprintf("Error occurred while running test: %v", err))
