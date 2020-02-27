@@ -2,6 +2,7 @@ package tests
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
@@ -153,9 +154,7 @@ func TestUserCanLogout(t *testing.T) {
 
 	// Check that session is created
 	session, err := store.Get(request, auth.CookieName)
-	if err != nil {
-		log.Print(err)
-	}
+	logErr(err)
 
 	asserts.False(session.IsNew, "Session is created and it is in Redis")
 	asserts.Equal("userModel1@yahoo.com", session.Values["email"])
@@ -165,9 +164,109 @@ func TestUserCanLogout(t *testing.T) {
 
 	// Check that session is created
 	session, err = store.Get(request, auth.CookieName)
-	if err != nil {
-		log.Print(err)
-	}
+	logErr(err)
 
-	asserts.Equal(-1, session.Options.MaxAge, "Session is destroyed and user is no longer authenticated")
+	asserts.Equal(
+		-1,
+		session.Options.MaxAge,
+		"Session is destroyed and user is no longer authenticated",
+		)
+}
+
+func TestSessionAuthenticationMiddleware(t *testing.T) {
+	resetDb(true)
+	config.SetupSessionStorage()
+	asserts := getAsserts(t)
+
+	// Set up routes for testing the middleware
+	router := gin.Default()
+
+	router.POST("/login", auth.Controller{}.AuthenticateUser)
+	router.POST("/logout", auth.Controller{}.LogoutUser)
+
+	protected := router.Group("/protected")
+	protected.Use(auth.VerifyAuthentication())
+	protected.GET("/ping", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "Request received",
+		})
+	})
+
+	// Make a call to the protected route without a cookie in the request
+	request, err := http.NewRequest("GET", "/protected/ping", nil)
+	logErr(err)
+	response := httptest.NewRecorder()
+	router.ServeHTTP(response, request)
+
+	// Should fail and return response 403 with error "No authentication cookie
+	// present"
+	asserts.Equal(http.StatusForbidden, response.Code, "No valid cookie, thus access is forbidden")
+	asserts.True(strings.Contains(response.Body.String(), "No session cookie present"))
+
+	// Send request with fake cookie
+	request.Header.Add("Cookie", fmt.Sprintf("%s=FakeCookie", auth.CookieName))
+	response = httptest.NewRecorder()
+	router.ServeHTTP(response, request)
+
+	// Should return response 403 with error "No existing sessions were found.
+	// Please, log in."
+	asserts.Equal(http.StatusForbidden, response.Code, "Invalid cookie, thus access is forbidden")
+	asserts.True(strings.Contains(response.Body.String(), "Error occurred while getting session"))
+
+	// Authenticate as test user
+	cookie := authTestUser(router)
+
+	// Log out
+	request, _ = http.NewRequest("POST", "/logout", nil)
+	request.Header.Add("Cookie", cookie)
+	response = httptest.NewRecorder()
+	router.ServeHTTP(response, request)
+
+	// Send request to the protected route
+	request, _ = http.NewRequest("GET", "/protected/ping", nil)
+	request.Header.Add("Cookie", cookie)
+	response = httptest.NewRecorder()
+	router.ServeHTTP(response, request)
+
+	// Should return response 403 with error "Session MaxAge is -1, session ought
+	// to be terminated. Try logging in again"
+	asserts.Equal(http.StatusForbidden, response.Code, "Invalid cookie, thus access is forbidden")
+	asserts.True(
+		strings.Contains(
+			response.Body.String(),
+			"No existing sessions were found. Please, log in.",
+		),
+	)
+
+	// Authenticate as test user
+	authTestUser(router)
+
+	// Send request to protected route
+	request, _ = http.NewRequest("GET", "/protected/ping", nil)
+	request.Header.Add("Cookie", cookie)
+	response = httptest.NewRecorder()
+	router.ServeHTTP(response, request)
+
+	// Should return response with HTTP code 200
+	asserts.Equal(http.StatusOK, response.Code, "Valid cookie, thus access is not prevented")
+	asserts.True(strings.Contains(response.Body.String(), "Request received"))
+}
+
+func logErr(err error) {
+	if err != nil {
+		log.Println(fmt.Sprintf("Error occurred while running test: %v", err))
+	}
+}
+
+func authTestUser(r *gin.Engine) string {
+	request, _ := http.NewRequest(
+		"POST",
+		"/login",
+		bytes.NewBufferString(loginTestCases[0].params),
+	)
+	request.Header.Set("Content-Type", "application/json")
+	response := httptest.NewRecorder()
+	r.ServeHTTP(response, request)
+
+	return response.Header().Get("Set-Cookie")
 }

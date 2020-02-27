@@ -28,20 +28,32 @@ type Profile 	struct {
 func (ctrl Controller) AuthenticateUser(c *gin.Context) {
 	var creds Creds
 	err := json.NewDecoder(c.Request.Body).Decode(&creds)
-	interruptAuthentication(c, err)
+	if err != nil {
+		interruptAuthentication(c, err)
+		return
+	}
 
 	// Get user with that email
 	user, err := users.GetByEmail(creds.Email)
-	interruptAuthentication(c, err)
+	if err != nil {
+		interruptAuthentication(c, err)
+		return
+	}
 
 	// Check password
 	err = user.CheckPassword(creds.Password)
-	interruptAuthentication(c, err)
+	if err != nil {
+		interruptAuthentication(c, err)
+		return
+	}
 
 	// Create token
 	authTokenStruct := AuthToken{}
 	token, err := authTokenStruct.GenerateToken(user)
-	interruptAuthentication(c, err)
+	if err != nil {
+		interruptAuthentication(c, err)
+		return
+	}
 
 	// Store session in persistence cache
 	store := config.GetSessionStorage()
@@ -70,6 +82,7 @@ func (ctrl Controller) AuthenticateUser(c *gin.Context) {
 			"message": "Could not save session",
 		})
 		c.Abort()
+		return
 	}
 }
 
@@ -98,6 +111,7 @@ func (ctrl Controller) LogoutUser(c *gin.Context) {
 			"message": "Could not save session",
 		})
 		c.Abort()
+		return
 	}
 }
 
@@ -115,6 +129,5 @@ func interruptAuthentication(c *gin.Context, err error) {
 			"message": "Incorrect email and/or password",
 		})
 		c.Abort()
-		return
 	}
 }
