@@ -1,15 +1,17 @@
 package main
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/graphql-go/graphql"
 	"github.com/jinzhu/gorm"
 	"github.com/subosito/gotenv"
-	comm "workour-api/common"
-	g "workour-api/gql"
-	"workour-api/sessions"
+	"os"
+	"workour-api/config"
 	u "workour-api/users"
+)
+
+var (
+	appPort = os.Getenv("GIN_PORT")
+
 )
 
 func init() {
@@ -21,39 +23,6 @@ func init() {
 	}
 }
 
-func initAPI() (*gin.Engine, *gorm.DB) {
-	db := comm.InitDb()
-	router := gin.Default()
-
-	rootQuery := g.NewRoot()
-	// Create a new graphql schema, passing in the root query
-	schema, err := graphql.NewSchema(
-		graphql.SchemaConfig{
-			Query: rootQuery.Query,
-			Mutation: rootQuery.Mutation,
-		},
-	)
-	if err != nil {
-		fmt.Println("error creating schema: ", err)
-	}
-
-	router.POST("/public", g.GraphQL(schema))
-	router.OPTIONS("/public", func(c *gin.Context) {
-		c.Writer.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
-		c.Writer.Header().Set("Access-Control-Request-Method","POST, OPTIONS")
-		c.Writer.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, Accept-Encoding")
-	})
-
-	return router, db
-}
-
-func Migrate(db *gorm.DB) {
-	db.AutoMigrate(
-		u.User{},
-		sessions.Session{},
-	)
-}
-
 func main() {
 	r, db := initAPI()
 	Migrate(db)
@@ -61,3 +30,22 @@ func main() {
 
 	_ = r.Run(":8080")
 }
+
+func Migrate(db *gorm.DB) {
+	db.AutoMigrate(
+		u.User{},
+	)
+}
+
+func initAPI() (*gin.Engine, *gorm.DB) {
+	db := config.InitDb()
+	router := gin.Default()
+
+	// Set up Redis client for sessions
+	config.SetupSessionStorage()
+
+	SetupRoutes(router)
+
+	return router, db
+}
+

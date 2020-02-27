@@ -7,7 +7,7 @@ import (
 	"github.com/jinzhu/gorm"
 	"github.com/stretchr/testify/assert"
 	"testing"
-	c "workour-api/common"
+	"workour-api/config"
 	"workour-api/gql"
 	u "workour-api/users"
 )
@@ -21,7 +21,7 @@ var asserts *assert.Assertions
 // ------------------------------------------------------------------------------------
 
 func initTestAPI() *gin.Engine {
-	db = c.InitTestDb()
+	db = config.InitTestDb()
 	migrate()
 	router := gin.Default()
 
@@ -54,8 +54,8 @@ func getAsserts(t *testing.T) *assert.Assertions {
 // ------------------------------------------------------------------------------
 
 func resetDb(addMock bool) {
-	_ = c.ResetTestDb(db)
-	db = c.InitTestDb()
+	_ = config.ResetTestDb(db)
+	db = config.InitTestDb()
 	migrate()
 	if addMock {
 		userMocker(10)

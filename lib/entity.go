@@ -1,4 +1,4 @@
-package common
+package lib
 
 // Entity interfaces describes the base
 type entity interface {
