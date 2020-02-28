@@ -52,6 +52,7 @@ func GetUserResolver(p g.ResolveParams) (interface{}, error) {
 // authenticates with provided password. If authentication succeeds a token
 // is created and set in the header, and user non-sensitive details are
 // returned in the response body.
+// TODO remove this resolver and related tests
 func AuthenticateUserResolver(p g.ResolveParams) (interface{}, error) {
 	// Get user by email
 	//email := p.Args["email"].(string)

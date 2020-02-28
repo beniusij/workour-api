@@ -7,11 +7,16 @@ import (
 	"github.com/gorilla/sessions"
 	"log"
 	"net/http"
+	"os"
 	"workour-api/config"
 	"workour-api/users"
 )
 
 const CookieName = "WRKSESSID"
+
+var env = os.Getenv("APP_ENV")
+var secureFlag = true
+var domain = os.Getenv("DOMAIN")
 
 type Controller struct {}
 type Creds 		struct {
@@ -65,26 +70,22 @@ func (ctrl Controller) AuthenticateUser(c *gin.Context) {
 		log.Fatal(err.Error())
 	}
 
+	//
+
 	// Set session cookie value
 	session.ID = token
-	session.Options = &sessions.Options{
-		Path:     "/",
-		Domain:   "",
-		MaxAge:   3600 * 24,
-		Secure:   true,
-		HttpOnly: true,
-		SameSite: http.SameSiteLaxMode,
-	}
+	session.Options = setCookieOptions()
 	
 	// Set and save new values to session
 	updateSession(session, user)
 	if err = session.Save(c.Request, c.Writer); err != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "Could not save session",
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Could not save session",
 		})
 		c.Abort()
 		return
 	}
+	c.Status(http.StatusOK)
 }
 
 // Get user details from session stored in Redis
@@ -146,9 +147,26 @@ func updateSession(s *sessions.Session, u users.User) {
 
 func interruptAuthentication(c *gin.Context, err error) {
 	if err != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "Incorrect email and/or password",
+		c.JSON(http.StatusForbidden, gin.H{
+			"error": "Incorrect email and/or password",
 		})
 		c.Abort()
+	}
+}
+
+// Sets options for cookie which is later passed to session
+func setCookieOptions() *sessions.Options {
+	if env == "development" {
+		secureFlag = false
+		domain = "localhost"
+	}
+
+	return &sessions.Options{
+		Path:     "/",
+		Domain:   domain,
+		MaxAge:   3600 * 24,
+		Secure:   false,
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
 	}
 }

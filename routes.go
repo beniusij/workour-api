@@ -2,13 +2,35 @@ package main
 
 import (
 	"fmt"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/graphql-go/graphql"
+	"os"
+	"time"
 	auth "workour-api/authentication"
 	g "workour-api/gql"
 )
 
+var allowHeaders = []string{
+	"Accept",
+	"Accept-Encoding",
+	"Authorization",
+	"Content-Length",
+	"Content-Type",
+	"X-CSRF-Token",
+}
+
 func SetupRoutes(router *gin.Engine) {
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:           []string{os.Getenv("CORS_ORIGIN")},
+		AllowMethods:           []string{"POST", "PUT", "GET", "OPTIONS"},
+		AllowHeaders:           allowHeaders,
+		AllowCredentials:       true,
+		ExposeHeaders:          []string{"Content-Length"},
+		MaxAge:                 24 * time.Hour,
+		AllowFiles:             true,
+	}))
+
 	publicRoutes(router)
 	adminRoutes(router)
 }
@@ -32,13 +54,8 @@ func publicRoutes(r *gin.Engine) {
 
 	r.POST("/login", authController.AuthenticateUser)
 	r.POST("/logout", authController.LogoutUser)
-	r.GET("/getCurrentUser")
+	r.GET("/getCurrentUser", authController.GetCurrentUser)
 	r.POST("/public", g.GraphQL(schema))
-	r.OPTIONS("/public", func(c *gin.Context) {
-		c.Writer.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
-		c.Writer.Header().Set("Access-Control-Request-Method","POST, OPTIONS")
-		c.Writer.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, Accept-Encoding")
-	})
 }
 
 // Set up role-protected routes
