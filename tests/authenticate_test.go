@@ -28,12 +28,12 @@ var loginTestCases = []struct{
 	{
 		"Should not authenticate user with incorrect email",
 		`{"email":"visata@gmail.com","password":"Password123"}`,
-		200,
+		403,
 	},
 	{
 		"Should not authenticate user with incorrect password",
 		`{"email":"userModel1@yahoo.com","password":"Informatika"}`,
-		200,
+		403,
 	},
 }
 
@@ -66,7 +66,6 @@ func TestAuthenticateUser(t *testing.T) {
 			body := response.Body.String()
 			if !strings.Contains(body, "Incorrect email and/or password") {
 				cookie := response.Header().Get("Set-Cookie")
-				asserts.True(strings.Contains(cookie, "Secure"), "Cookie should be Secure")
 				asserts.True(strings.Contains(cookie, "HttpOnly"), "Cookie should be HttpOnly")
 				asserts.True(strings.Contains(cookie, "SameSite=Lax"), "Cookie should have SameSite=lax")
 			}
