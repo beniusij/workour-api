@@ -48,7 +48,6 @@ func CreateDefaultRoles() {
 		role := s.convertToRole()
 
 		// Save records to database
-		//db.FirstOrCreate(&role)
 		db.Where(Role{Name: role.Name}).FirstOrCreate(&role)
 	}
 }

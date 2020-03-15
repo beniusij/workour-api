@@ -46,8 +46,13 @@ func (u *User) CheckPassword(password string) error {
 func (u User) Save(data interface{}) (User, error) {
 	db := config.GetDB()
 	user := data.(User)
-	err := db.Create(&user).Error
 
+	// Check and get default role
+	if user.RoleId == uint(0) {
+		user.RoleId	= roles.GetDefaultRoleId()
+	}
+
+	err := db.Create(&user).Error
 	if err != nil {
 		return User{}, err
 	}

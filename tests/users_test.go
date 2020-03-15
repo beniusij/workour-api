@@ -120,6 +120,7 @@ func TestCreateUserResolver(t *testing.T) {
 		// Assert response return
 		asserts.Nil(err, "New userModel created with validated data")
 		asserts.Equal(uint(1), user.ID, "User has ID 1")
+		asserts.Equal(getRegularUserRoleId(), user.RoleId, "Created user has default role")
 	})
 
 	resetDb(false)

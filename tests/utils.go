@@ -74,17 +74,8 @@ func migrate() {
 	)
 }
 
-func addMockRoles() {
-	role := roles.Role{
-		Name:      "Regular User",
-		Authority: 1,
-		Policies:  nil,
-	}
-	db.Create(&role)
-}
-
 // -------------------------------------------------------------------------
-// ------------------------------- User mock -------------------------------
+// ------------------------------- Mock ------------------------------------
 // -------------------------------------------------------------------------
 
 func userMocker(n int) []u.User {
@@ -104,6 +95,15 @@ func userMocker(n int) []u.User {
 	}
 
 	return ret
+}
+
+func addMockRoles() {
+	role := roles.Role{
+		Name:      "Regular User",
+		Authority: 1,
+		Policies:  nil,
+	}
+	db.Create(&role)
 }
 
 func newUserModel() u.User {
