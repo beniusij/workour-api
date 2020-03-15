@@ -1,19 +1,4 @@
 Roles:
-  - Name: Anonymous User
-    Authority: 0
-    Policies:
-      - Resource: User
-        Index:  false
-        Create: true
-        Read:   false
-        Update: false
-        Delete: false
-      - Resource: Role
-        Index:  false
-        Create: false
-        Read:   false
-        Update: false
-        Delete: false
   - Name: Regular User
     Authority: 1
     Policies:
