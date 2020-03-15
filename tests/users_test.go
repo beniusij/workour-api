@@ -2,9 +2,15 @@ package tests
 
 import (
 	"errors"
+	"fmt"
+	"log"
 	"testing"
+	"workour-api/config"
+	"workour-api/roles"
 	u "workour-api/users"
 )
+
+const regularRoleId = "Regular User"
 
 func TestUserSettingAndCheckingPassword(t *testing.T) {
 	asserts := getAsserts(t)
@@ -109,11 +115,11 @@ func TestCreateUserResolver(t *testing.T) {
 		asserts.Nil(err, "Form data validated and should not return error")
 
 		userModel := u.User{}
-		userId, err := userModel.Save(userValidator.UserModel)
+		user, err := userModel.Save(userValidator.UserModel)
 
 		// Assert response return
 		asserts.Nil(err, "New userModel created with validated data")
-		asserts.Equal(uint(1), userId, "User has ID 1")
+		asserts.Equal(uint(1), user.ID, "User has ID 1")
 	})
 
 	resetDb(false)
@@ -155,4 +161,17 @@ func TestGetUserResolver(t *testing.T) {
 	})
 
 	resetDb(false)
+}
+
+// Get ID of Regular User role
+func getRegularUserRoleId() uint {
+	db := config.GetDB()
+	role := roles.Role{Name: regularRoleId}
+
+	err := db.First(&role).Error
+	if err != nil {
+		log.Println(fmt.Sprintf("Error while grabbing regular user role: %v", err))
+	}
+
+	return role.ID
 }

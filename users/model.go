@@ -9,10 +9,11 @@ import (
 
 type User struct {
 	ID				uint		`gorm:"primary_key"`
-	Role			roles.Role 	`gorm:"foreignkey:name"`
-	Email			string		`gorm:"column:email;type:varchar(100);unique"`
-	FirstName		string		`gorm:"column:first_name"`
-	LastName		string		`gorm:"column:last_name"`
+	Role			roles.Role 	`gorm:"foreignkey:RoleId"`
+	RoleId			uint		`gorm:"not null"`
+	Email			string		`gorm:"unique"`
+	FirstName		string
+	LastName		string
 	PasswordHash	string		`gorm:"column:password;not null"`
 }
 
@@ -42,16 +43,16 @@ func (u *User) CheckPassword(password string) error {
 	return nil
 }
 
-func (u User) Save(data interface{}) (uint, error) {
+func (u User) Save(data interface{}) (User, error) {
 	db := config.GetDB()
 	user := data.(User)
 	err := db.Create(&user).Error
 
 	if err != nil {
-		return 0, err
+		return User{}, err
 	}
 
-	return user.ID, nil
+	return user, nil
 }
 
 func (u User) GetById(id uint) (User, error) {

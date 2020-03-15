@@ -9,6 +9,7 @@ import (
 	"testing"
 	"workour-api/config"
 	"workour-api/gql"
+	"workour-api/roles"
 	u "workour-api/users"
 )
 
@@ -57,13 +58,29 @@ func resetDb(addMock bool) {
 	_ = config.ResetTestDb(db)
 	db = config.InitTestDb()
 	migrate()
+
+	addMockRoles()
+
 	if addMock {
 		userMocker(10)
 	}
 }
 
 func migrate() {
-	db.AutoMigrate(u.User{})
+	db.AutoMigrate(
+		u.User{},
+		roles.Policy{},
+		roles.Role{},
+	)
+}
+
+func addMockRoles() {
+	role := roles.Role{
+		Name:      "Regular User",
+		Authority: 1,
+		Policies:  nil,
+	}
+	db.Create(&role)
 }
 
 // -------------------------------------------------------------------------
