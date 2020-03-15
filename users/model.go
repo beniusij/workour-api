@@ -4,14 +4,16 @@ import (
 	"errors"
 	"golang.org/x/crypto/bcrypt"
 	"workour-api/config"
+	"workour-api/roles"
 )
 
 type User struct {
-	ID				uint	`gorm:"primary_key"`
-	Email			string	`gorm:"column:email;type:varchar(100);unique_index"`
-	FirstName		string	`gorm:"column:first_name"`
-	LastName		string	`gorm:"column:last_name"`
-	PasswordHash	string	`gorm:"column:password;not null"`
+	ID				uint		`gorm:"primary_key"`
+	Role			roles.Role 	`gorm:"foreignkey:name"`
+	Email			string		`gorm:"column:email;type:varchar(100);unique_index"`
+	FirstName		string		`gorm:"column:first_name"`
+	LastName		string		`gorm:"column:last_name"`
+	PasswordHash	string		`gorm:"column:password;not null"`
 }
 
 func (u *User) SetPassword(password string) error {

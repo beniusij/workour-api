@@ -15,4 +15,5 @@ require (
 	golang.org/x/crypto v0.0.0-20200204104054-c9f3fb736b72
 	gopkg.in/boj/redistore.v1 v1.0.0-20160128113310-fc113767cd6b
 	gopkg.in/go-playground/validator.v9 v9.31.0
+	gopkg.in/yaml.v2 v2.2.2
 )

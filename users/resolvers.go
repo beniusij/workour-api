@@ -14,7 +14,7 @@ type Session struct {
 
 // Handles mutation to create a user
 func CreateUserResolver(p g.ResolveParams) (interface{}, error) {
-	userValidator := NewUserValidator()
+ 	userValidator := NewUserValidator()
 	userStruct := &User{}
 	c := p.Context.(*gin.Context)
 
