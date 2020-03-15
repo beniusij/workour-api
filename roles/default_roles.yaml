@@ -1,16 +1,61 @@
 Roles:
+  - Name: Anonymous User
+    Authority: 0
+    Policies:
+      - Resource: User
+        Index:  false
+        Create: true
+        Read:   false
+        Update: false
+        Delete: false
+      - Resource: Role
+        Index:  false
+        Create: false
+        Read:   false
+        Update: false
+        Delete: false
+  - Name: Regular User
+    Authority: 1
+    Policies:
+      - Resource: User
+        Index:  false
+        Create: false
+        Read:   true
+        Update: true
+        Delete: false
+      - Resource: Role
+        Index:  false
+        Create: false
+        Read:   false
+        Update: false
+        Delete: false
+  - Name: Contributor
+    Authority: 5
+    Policies:
+      - Resource: User
+        Index:  false
+        Create: false
+        Read:   true
+        Update: true
+        Delete: false
+      - Resource: Role
+        Index:  false
+        Create: false
+        Read:   false
+        Update: false
+        Delete: false
   - Name: Administrator
     Authority: 10
     Policies:
       - Resource: User
-        Index: true
+        Index:  true
         Create: true
-        Read: true
+        Read:   true
         Update: true
         Delete: true
       - Resource: Role
-        Index: true
+        Index:  true
         Create: true
-        Read: true
+        Read:   true
         Update: true
         Delete: true

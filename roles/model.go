@@ -6,7 +6,8 @@ import (
 
 type Policy struct {
 	gorm.Model
-	Resource 	string `gorm:"unique;not null"`
+	RoleId		uint
+	Resource 	string `gorm:"not null"`
 	Index		bool
 	Create 		bool
 	Read 		bool
