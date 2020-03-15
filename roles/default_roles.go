@@ -42,10 +42,35 @@ func CreateDefaultRoles() {
 		log.Fatal(err)
 	}
 
-	// Save to database
 	db := config.GetDB()
+	for _, s := range d.Roles {
+		// Convert struct to models
+		role := s.convertToRole()
 
-	for _, role := range d.Roles {
+		// Save records to database
 		db.Create(&role)
+	}
+}
+
+func (r DefaultRole) convertToRole() Role {
+	policies := make([]Policy, len(r.Policies))
+
+	for i, policy := range r.Policies {
+		go func (i int, p PolicyConfig) {
+			policies[i] = Policy{
+				Resource: p.Resource,
+				Index:    p.Index,
+				Create:   p.Create,
+				Read:     p.Read,
+				Update:   p.Update,
+				Delete:   p.Delete,
+			}
+		} (i, policy)
+	}
+
+	return Role{
+		Name:		r.Name,
+		Authority:	r.Authority,
+		Policies:	policies,
 	}
 }

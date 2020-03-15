@@ -10,7 +10,7 @@ import (
 type User struct {
 	ID				uint		`gorm:"primary_key"`
 	Role			roles.Role 	`gorm:"foreignkey:name"`
-	Email			string		`gorm:"column:email;type:varchar(100);unique_index"`
+	Email			string		`gorm:"column:email;type:varchar(100);unique"`
 	FirstName		string		`gorm:"column:first_name"`
 	LastName		string		`gorm:"column:last_name"`
 	PasswordHash	string		`gorm:"column:password;not null"`

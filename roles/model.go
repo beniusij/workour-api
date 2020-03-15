@@ -6,7 +6,7 @@ import (
 
 type Policy struct {
 	gorm.Model
-	Resource 	string
+	Resource 	string `gorm:"unique;not null"`
 	Index		bool
 	Create 		bool
 	Read 		bool
@@ -16,7 +16,7 @@ type Policy struct {
 
 type Role struct {
 	gorm.Model
- 	Name 		string
+ 	Name 		string `gorm:"unique;not null"`
 	Authority 	int
 	Policies 	[]Policy `gorm:"foreignkey:RoleId"`
 }
