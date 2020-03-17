@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"workour-api/config"
+	"workour-api/roles"
 	"workour-api/users"
 )
 
@@ -28,6 +29,7 @@ type Profile 	struct {
 	Email 		string
 	FirstName 	string
 	LastName 	string
+	Role		roles.Role
 }
 
 // Authentication handler that accepts user details
@@ -70,8 +72,6 @@ func (ctrl Controller) AuthenticateUser(c *gin.Context) {
 		log.Fatal(err.Error())
 	}
 
-	//
-
 	// Set session cookie value
 	session.ID = token
 	session.Options = setCookieOptions()
@@ -96,11 +96,14 @@ func (ctrl Controller) GetCurrentUser(c *gin.Context) {
 		log.Println(fmt.Sprintf("Error occurred while getting current user: %v", err))
 	}
 
+	roleId := session.Values["role_id"].(uint)
+
 	profile := Profile{
 		Id: session.Values["id"].(uint),
 		Email: session.Values["email"].(string),
 		FirstName: session.Values["first_name"].(string),
 		LastName: session.Values["last_name"].(string),
+		Role: roles.GetRoleById(roleId),
 	}
 
 	profileJson, err := json.Marshal(&profile)
@@ -143,6 +146,7 @@ func updateSession(s *sessions.Session, u users.User) {
 	s.Values["email"] = u.Email
 	s.Values["first_name"] = u.FirstName
 	s.Values["last_name"] = u.LastName
+	s.Values["role_id"] = u.RoleId
 }
 
 func interruptAuthentication(c *gin.Context, err error) {

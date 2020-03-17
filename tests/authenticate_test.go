@@ -13,8 +13,6 @@ import (
 	"workour-api/config"
 )
 
-
-const tokenType = "Bearer"
 var loginTestCases = []struct{
 	msg		string
 	params	string
@@ -273,6 +271,11 @@ func TestGetCurrentUser(t *testing.T) {
 	result := response.Body.String()
 	asserts.Equal(http.StatusOK, response.Code, "Response with HTTP code 200 returned")
 	asserts.True(strings.Contains(result, "userModel1@yahoo.com"))
+
+	// Assert it has correct role id
+	roleId := getRegularUserRoleId()
+	expected := fmt.Sprintf(`\"Role\":{\"ID\":%d`, roleId)
+	asserts.Contains(result, expected, "Current user json has correct role id")
 }
 
 func logErr(err error) {

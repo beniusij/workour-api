@@ -37,3 +37,14 @@ func GetDefaultRoleId() uint {
 
 	return role.ID
 }
+
+// Get Role and its Policies by role id
+func GetRoleById(id uint) Role {
+	db := config.GetDB()
+	role := Role{}
+
+	role.ID = id
+	db.First(&role)
+
+	return role
+}
