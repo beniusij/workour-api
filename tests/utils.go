@@ -88,6 +88,7 @@ func userMocker(n int) []u.User {
 			Email: fmt.Sprintf("userModel%v@yahoo.com", i),
 			FirstName: fmt.Sprintf("User%v", i),
 			LastName: fmt.Sprintf("User%v", i),
+			RoleId: roles.GetDefaultRoleId(),
 		}
 		_ = user.SetPassword("Password123")
 		db.Create(&user)
