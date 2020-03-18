@@ -129,39 +129,32 @@ func TestCreateUserResolver(t *testing.T) {
 func TestGetUserResolver(t *testing.T) {
 	asserts := getAsserts(t)
 	userEntity := u.User{}
-	userMocker(10)
-	var (
-		id		uint
-		args 	map[string]interface{}
-		err		error
-		user	u.User
-	)
+	resetDb(true)
 
 	t.Run("returns user with ID 1", func(t *testing.T) {
-		id = 1
-		args = map[string]interface{}{
-			"id":	id,
-		}
+		id := uint(1)
+		userEntity.ID = id
 
-		user, err = userEntity.GetById(args["id"].(uint))
+		err := userEntity.GetById()
 		asserts.Nil(err, "Successfully fetched user by ID, no erros")
-		asserts.Equalf(id, user.ID, "Successfully fetched user with ID %v", id)
-		asserts.IsType(u.User{}, user, "Should return object of User interface")
+		asserts.Equalf(id, userEntity.ID, "Successfully fetched user with ID %v", id)
+		asserts.IsType(u.User{}, userEntity, "Should return object of User interface")
 	})
 
 	t.Run("returns nil for non-existing user", func(t *testing.T) {
-		id = 101
-		args = map[string]interface{}{
-			"id": id,
-		}
+		id := uint(101)
+		userEntity.ID = id
 
-		user, err = userEntity.GetById(args["id"].(uint))
+		err := userEntity.GetById()
 		expectedErr := errors.New("record not found")
-		asserts.Equal(uint(0), user.ID, "Attempt to fetch non-existent user returns empty struct")
 		asserts.EqualError(err, expectedErr.Error(), "Attempt to fetch non-existent user should return an error")
 	})
 
 	resetDb(false)
+}
+
+func TestLoadUserMiddleware(t *testing.T) {
+
 }
 
 // Get ID of Regular User role

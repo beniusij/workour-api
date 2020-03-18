@@ -60,16 +60,15 @@ func (u User) Save(data interface{}) (User, error) {
 	return user, nil
 }
 
-func (u User) GetById(id uint) (User, error) {
+func (u User) GetById() error {
 	db := config.GetDB()
-	user := User{}
-	err := db.Where(&User{ID: id}).First(&user).Error
+	err := db.Where(&u).First(&u).Error
 
 	if err != nil {
-		return user, err
+		return err
 	}
 
-	return user, nil
+	return nil
 }
 
 func GetByEmail(email string) (User, error) {

@@ -36,9 +36,9 @@ func CreateUserResolver(p g.ResolveParams) (interface{}, error) {
 // GetUserResolver resolves our user query through a db call to GetById
 func GetUserResolver(p g.ResolveParams) (interface{}, error) {
 	user := User{}
-	id := p.Args["id"].(uint)
+	user.ID = p.Args["id"].(uint)
 
-	user, err := user.GetById(id)
+	err := user.GetById()
 	if err != nil {
 		return nil, err
 	}
