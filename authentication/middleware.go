@@ -1,9 +1,12 @@
 package authentication
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
 	"workour-api/config"
+	"workour-api/users"
 )
 
 func VerifyAuthentication() gin.HandlerFunc {
@@ -54,8 +57,24 @@ func RefreshSessionExp() gin.HandlerFunc {
 	}
 }
 
-func AuthoriseAdminAccess() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		// Should verify if user accessing route is actually an admin
+func LoadUser(c *gin.Context)  {
+	// Get cookie
+	store := config.GetSessionStorage()
+	session, err := store.Get(c.Request, CookieName)
+	if err != nil {
+		log.Println(fmt.Sprintf("Failed to load current session: %v", err))
+		c.Next()
 	}
+
+	// Load user
+	user := users.User{ID: session.Values["id"].(uint)}
+	err = user.GetById()
+	if err != nil {
+		log.Println(fmt.Sprintf("Failed to load user: %v", err))
+		c.Next()
+	}
+
+	// Store in context
+	c.Keys = make(map[string]interface{})
+	c.Keys["user"] = user
 }

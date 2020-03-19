@@ -178,7 +178,6 @@ func TestSessionAuthenticationMiddleware(t *testing.T) {
 	// Set up routes for testing the middleware
 	router := gin.Default()
 
-	router.POST("/login", auth.Controller{}.AuthenticateUser)
 	router.POST("/logout", auth.Controller{}.LogoutUser)
 
 	protected := router.Group("/protected")
@@ -249,13 +248,44 @@ func TestSessionAuthenticationMiddleware(t *testing.T) {
 	asserts.True(strings.Contains(response.Body.String(), "Request received"))
 }
 
+func TestLoadUserMiddleware(t *testing.T) {
+	resetDb(true)
+	config.SetupSessionStorage()
+	asserts := getAsserts(t)
+
+	router := gin.Default()
+
+	router.GET("/ping", auth.LoadUser, func(c *gin.Context) {
+		user := c.Keys["user"]
+
+		if user != nil {
+			c.JSON(http.StatusOK, gin.H{
+				"currentUser": user,
+			})
+		} else {
+			c.JSON(http.StatusNotFound, gin.H{
+				"error": "Request received",
+			})
+		}
+	})
+
+	cookie := authTestUser(router)
+
+	request, _ := http.NewRequest("GET", "/ping", nil)
+	request.Header.Add("Cookie", cookie)
+	response := httptest.NewRecorder()
+	router.ServeHTTP(response, request)
+
+	// Assert response body
+	asserts.Equal(http.StatusOK, response.Code)
+}
+
 func TestGetCurrentUser(t *testing.T) {
 	resetDb(true)
 	config.SetupSessionStorage()
 	asserts := getAsserts(t)
 
 	router := gin.Default()
-	router.POST("/login", auth.Controller{}.AuthenticateUser)
 	router.GET("/getCurrentUser", auth.Controller{}.GetCurrentUser)
 
 	// Log in as user
@@ -285,6 +315,8 @@ func logErr(err error) {
 }
 
 func authTestUser(r *gin.Engine) string {
+	r.POST("/login", auth.Controller{}.AuthenticateUser)
+
 	request, _ := http.NewRequest(
 		"POST",
 		"/login",

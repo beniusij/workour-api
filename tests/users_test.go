@@ -153,10 +153,6 @@ func TestGetUserResolver(t *testing.T) {
 	resetDb(false)
 }
 
-func TestLoadUserMiddleware(t *testing.T) {
-
-}
-
 // Get ID of Regular User role
 func getRegularUserRoleId() uint {
 	db := config.GetDB()

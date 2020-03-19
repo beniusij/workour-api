@@ -60,7 +60,7 @@ func (u User) Save(data interface{}) (User, error) {
 	return user, nil
 }
 
-func (u User) GetById() error {
+func (u* User) GetById() error {
 	db := config.GetDB()
 	err := db.Where(&u).First(&u).Error
 
