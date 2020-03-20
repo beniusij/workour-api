@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/assert"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -36,12 +37,7 @@ var loginTestCases = []struct{
 }
 
 func TestAuthenticateUser(t *testing.T) {
-	asserts := getAsserts(t)
-	resetDb(true)
-
-	// Set up router for testing
-	router := gin.Default()
-	config.SetupSessionStorage()
+	asserts, router := setUp(t)
 
 	// Login route to test login action in controller
 	router.POST("/login", auth.Controller{}.AuthenticateUser)
@@ -72,14 +68,10 @@ func TestAuthenticateUser(t *testing.T) {
 }
 
 func TestAuthenticatedSessionStoredInSessionStorage(t *testing.T) {
-	resetDb(true)
+	_, router := setUp(t)
 
-	// Set up router for testing
-	router := gin.Default()
-	config.SetupSessionStorage()
-
-	// Login route to test login action in controller
-	router.POST("/login", auth.Controller{}.AuthenticateUser)
+	// Add login route with handler and authenticate as a test user
+	cookie := authTestUser(router)
 
 	// Stub route to test if authenticated user session is stored in session store
 	router.GET("/get", func(c *gin.Context) {
@@ -94,60 +86,34 @@ func TestAuthenticatedSessionStoredInSessionStorage(t *testing.T) {
 		}
 
 		asserts.False(session.IsNew)
+		asserts.Equal("userModel1@yahoo.com", session.Values["email"])
 	})
 
-	// First authenticate a user
-	request, _ := http.NewRequest(
-		"POST",
-		"/login",
-		bytes.NewBufferString(loginTestCases[0].params),
-	)
-	request.Header.Set("Content-Type", "application/json")
-	response := httptest.NewRecorder()
-	router.ServeHTTP(response, request)
-
-	// Get token from response header
-	cookie := response.Header().Get("Set-Cookie")
-
 	// Try to get user profile from the session storage using token
-	request, _ = http.NewRequest(
+	request, _ := http.NewRequest(
 		"GET",
 		"/get",
 		nil,
 	)
 
 	request.Header.Add("Cookie", cookie)
-	response = httptest.NewRecorder()
+	response := httptest.NewRecorder()
 	router.ServeHTTP(response, request)
 }
 
 func TestUserCanLogout(t *testing.T) {
-	resetDb(true)
-	config.SetupSessionStorage()
-	asserts := getAsserts(t)
-
-	// Set up router and session storage
-	router := gin.Default()
+	asserts, router := setUp(t)
 	store := config.GetSessionStorage()
 
+	cookie := authTestUser(router)
+
 	// Add routes
-	router.POST("/login", auth.Controller{}.AuthenticateUser)
 	router.POST("/logout", auth.Controller{}.LogoutUser)
 
-	// Authenticate user
-	request, _ := http.NewRequest(
-		"POST",
-		"/login",
-		bytes.NewBufferString(loginTestCases[0].params),
-	)
-	request.Header.Set("Content-Type", "application/json")
-	response := httptest.NewRecorder()
-	router.ServeHTTP(response, request)
-
 	// Prep for logout
-	request, _ = http.NewRequest("POST", "/logout", nil)
-	request.Header.Add("Cookie", response.Header().Get("Set-Cookie"))
-	response = httptest.NewRecorder()
+	request, _ := http.NewRequest("POST", "/logout", nil)
+	request.Header.Add("Cookie", cookie)
+	response := httptest.NewRecorder()
 
 	// Check that session is created
 	session, err := store.Get(request, auth.CookieName)
@@ -171,25 +137,22 @@ func TestUserCanLogout(t *testing.T) {
 }
 
 func TestSessionAuthenticationMiddleware(t *testing.T) {
-	resetDb(true)
-	config.SetupSessionStorage()
-	asserts := getAsserts(t)
-
-	// Set up routes for testing the middleware
-	router := gin.Default()
+	asserts, router := setUp(t)
 
 	router.POST("/logout", auth.Controller{}.LogoutUser)
-
-	protected := router.Group("/protected")
-	protected.Use(auth.VerifyAuthentication())
-	protected.GET("/ping", func(c *gin.Context) {
+	router.GET("/ping", auth.VerifyAuthentication, func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "Request received",
 		})
 	})
 
+	// TODO: refactor into slice of test cases
+	//testCase := []struct{
+	//	case string
+	//}{}
+
 	// Make a call to the protected route without a cookie in the request
-	request, err := http.NewRequest("GET", "/protected/ping", nil)
+	request, err := http.NewRequest("GET", "/ping", nil)
 	logErr(err)
 	response := httptest.NewRecorder()
 	router.ServeHTTP(response, request)
@@ -219,7 +182,7 @@ func TestSessionAuthenticationMiddleware(t *testing.T) {
 	router.ServeHTTP(response, request)
 
 	// Send request to the protected route
-	request, _ = http.NewRequest("GET", "/protected/ping", nil)
+	request, _ = http.NewRequest("GET", "/ping", nil)
 	request.Header.Add("Cookie", cookie)
 	response = httptest.NewRecorder()
 	router.ServeHTTP(response, request)
@@ -238,7 +201,7 @@ func TestSessionAuthenticationMiddleware(t *testing.T) {
 	authTestUser(router)
 
 	// Send request to protected route
-	request, _ = http.NewRequest("GET", "/protected/ping", nil)
+	request, _ = http.NewRequest("GET", "/ping", nil)
 	request.Header.Add("Cookie", cookie)
 	response = httptest.NewRecorder()
 	router.ServeHTTP(response, request)
@@ -249,11 +212,7 @@ func TestSessionAuthenticationMiddleware(t *testing.T) {
 }
 
 func TestLoadUserMiddleware(t *testing.T) {
-	resetDb(true)
-	config.SetupSessionStorage()
-	asserts := getAsserts(t)
-
-	router := gin.Default()
+	asserts, router := setUp(t)
 
 	router.GET("/ping", auth.LoadUser, func(c *gin.Context) {
 		user := c.Keys["user"]
@@ -277,19 +236,16 @@ func TestLoadUserMiddleware(t *testing.T) {
 	router.ServeHTTP(response, request)
 
 	// Assert response body
-	asserts.Equal(http.StatusOK, response.Code)
+	asserts.Equal(http.StatusOK, response.Code, "Should return response 200")
 }
 
 func TestGetCurrentUser(t *testing.T) {
-	resetDb(true)
-	config.SetupSessionStorage()
-	asserts := getAsserts(t)
-
-	router := gin.Default()
-	router.GET("/getCurrentUser", auth.Controller{}.GetCurrentUser)
+	asserts, router := setUp(t)
 
 	// Log in as user
 	cookie := authTestUser(router)
+
+	router.GET("/getCurrentUser", auth.Controller{}.GetCurrentUser)
 
 	// Get current authenticated user
 	request, _ := http.NewRequest("GET", "/getCurrentUser", nil)
@@ -314,17 +270,45 @@ func logErr(err error) {
 	}
 }
 
+// Adds login route if missing and authenticates as test user
 func authTestUser(r *gin.Engine) string {
-	r.POST("/login", auth.Controller{}.AuthenticateUser)
+	if !hasRoute(r, "/login") {
+		r.POST("/login", auth.Controller{}.AuthenticateUser)
+	}
+
+	testUser := `{"email":"userModel1@yahoo.com","password":"Password123"}`
 
 	request, _ := http.NewRequest(
 		"POST",
 		"/login",
-		bytes.NewBufferString(loginTestCases[0].params),
+		bytes.NewBufferString(testUser),
 	)
 	request.Header.Set("Content-Type", "application/json")
 	response := httptest.NewRecorder()
 	r.ServeHTTP(response, request)
 
 	return response.Header().Get("Set-Cookie")
+}
+
+// Helper method to check if router has route registered
+func hasRoute(r *gin.Engine, path string) bool {
+	routes := r.Routes()
+
+	for _, route := range routes {
+		if route.Path == path {
+			return true
+		}
+	}
+
+	return false
+}
+
+func setUp(t *testing.T) (a *assert.Assertions, r *gin.Engine) {
+	resetDb(true)
+	config.SetupSessionStorage()
+
+	a = getAsserts(t)
+	r = gin.New()
+
+	return
 }
