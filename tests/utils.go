@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"database/sql"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/graphql-go/graphql"
@@ -14,6 +15,7 @@ import (
 )
 
 const publicEndpoint = "/public"
+
 var db *gorm.DB
 var asserts *assert.Assertions
 
@@ -24,7 +26,7 @@ var asserts *assert.Assertions
 func initTestAPI() *gin.Engine {
 	db = config.InitTestDb()
 	migrate()
-	router := gin.Default()
+	router := gin.New()
 
 	rootQuery := gql.NewRoot()
 	schema, err := graphql.NewSchema(
@@ -55,10 +57,6 @@ func getAsserts(t *testing.T) *assert.Assertions {
 // ------------------------------------------------------------------------------
 
 func resetDb(addMock bool) {
-	_ = config.ResetTestDb(db)
-	db = config.InitTestDb()
-	migrate()
-
 	roleMocker()
 
 	if addMock {
@@ -72,6 +70,43 @@ func migrate() {
 		roles.Policy{},
 		roles.Role{},
 	)
+}
+
+func DeleteCreatedEntities(db *gorm.DB) func() {
+	type entity struct {
+		table   string
+		keyname string
+		key     interface{}
+	}
+	var entries []entity
+	hookName := "cleanupHook"
+
+	// Setup the onCreate Hook
+	db.Callback().Create().After("gorm:create").Register(hookName, func(scope *gorm.Scope) {
+		fmt.Printf("Inserted entities of %s with %s=%v\n", scope.TableName(), scope.PrimaryKey(), scope.PrimaryKeyValue())
+		entries = append(entries, entity{table: scope.TableName(), keyname: scope.PrimaryKey(), key: scope.PrimaryKeyValue()})
+	})
+	return func() {
+		// Remove the hook once we're done
+		defer db.Callback().Create().Remove(hookName)
+		// Find out if the current db object is already a transaction
+		_, inTransaction := db.CommonDB().(*sql.Tx)
+		tx := db
+		if !inTransaction {
+			tx = db.Begin()
+		}
+		// Loop from the end. It is important that we delete the entries in the
+		// reverse order of their insertion
+		for i := len(entries) - 1; i >= 0; i-- {
+			entry := entries[i]
+			fmt.Printf("Deleting entities from '%s' table with key %v\n", entry.table, entry.key)
+			tx.Table(entry.table).Where(entry.keyname+" = ?", entry.key).Delete("")
+		}
+
+		if !inTransaction {
+			tx.Commit()
+		}
+	}
 }
 
 // -------------------------------------------------------------------------

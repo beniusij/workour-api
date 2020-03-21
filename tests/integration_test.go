@@ -7,7 +7,6 @@ import (
 	"os"
 	"testing"
 	"workour-api/config"
-	u "workour-api/users"
 )
 
 var unauthRequestTestCases = []struct{
@@ -22,6 +21,9 @@ var unauthRequestTestCases = []struct{
 	//----------------------- Test cases for registering user ----------------------
 	{
 		func(r *http.Request) {
+			//_ = config.ResetTestDb(db)
+			//db = config.InitTestDb()
+			//migrate()
 			resetDb(false)
 		},
 		publicEndpoint,
@@ -79,14 +81,23 @@ var unauthRequestTestCases = []struct{
 }
 
 func TestMain(m *testing.M) {
+	// Pre-testing setup
 	db = config.InitTestDb()
-	db.AutoMigrate(u.User{})
-	exitval := m.Run()
+	migrate()
+
+	exitValue := m.Run()
+
+	// Post-testing cleanup
 	_ = config.ResetTestDb(db)
-	os.Exit(exitval)
+
+	os.Exit(exitValue)
 }
 
 func TestWithoutAuth(t *testing.T) {
+	// Set up cleaner hook
+	cleaner := DeleteCreatedEntities(db)
+	defer cleaner()
+
 	asserts := getAsserts(t)
 	r := initTestAPI()
 

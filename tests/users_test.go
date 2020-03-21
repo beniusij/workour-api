@@ -13,6 +13,9 @@ import (
 const regularRoleId = "Regular User"
 
 func TestUserSettingAndCheckingPassword(t *testing.T) {
+	// Set up cleaner hook
+	cleaner := DeleteCreatedEntities(db)
+	defer cleaner()
 	asserts := getAsserts(t)
 
 	// Set up test user
@@ -39,6 +42,10 @@ func TestUserSettingAndCheckingPassword(t *testing.T) {
 }
 
 func TestGetByEmail(t *testing.T) {
+	// Set up cleaner hook
+	cleaner := DeleteCreatedEntities(db)
+	defer cleaner()
+
 	asserts := getAsserts(t)
 	resetDb(true)
 
@@ -56,6 +63,10 @@ func TestGetByEmail(t *testing.T) {
 }
 
 func TestCreateUserResolver(t *testing.T) {
+	// Set up cleaner hook
+	cleaner := DeleteCreatedEntities(db)
+	defer cleaner()
+
 	asserts := getAsserts(t)
 	userValidator := u.NewUserValidator()
 	var (
@@ -134,6 +145,10 @@ func TestCreateUserResolver(t *testing.T) {
 }
 
 func TestGetUserResolver(t *testing.T) {
+	// Set up cleaner hook
+	cleaner := DeleteCreatedEntities(db)
+	defer cleaner()
+
 	asserts := getAsserts(t)
 	userEntity := u.User{}
 	resetDb(true)
