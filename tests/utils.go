@@ -115,10 +115,21 @@ func userMocker(n int) {
 }
 
 func roleMocker() {
+	var policies []roles.Policy
+
+	policies[0] = roles.Policy{
+		Resource: "User",
+		Index:    false,
+		Create:   true,
+		Read:     true,
+		Update:   true,
+		Delete:   false,
+	}
+
 	role := roles.Role{
 		Name:      "Regular User",
 		Authority: 1,
-		Policies:  nil,
+		Policies:  policies,
 	}
 	db.Create(&role)
 }
