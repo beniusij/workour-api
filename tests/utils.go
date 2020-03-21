@@ -126,11 +126,11 @@ func roleMocker() {
 		Delete:   false,
 	}
 	policies[1] = roles.Policy{
-		Resource: "User",
+		Resource: "Roles",
 		Index:    false,
-		Create:   true,
-		Read:     true,
-		Update:   true,
+		Create:   false,
+		Read:     false,
+		Update:   false,
 		Delete:   false,
 	}
 

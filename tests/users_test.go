@@ -172,12 +172,35 @@ func TestGetUserResolver(t *testing.T) {
 	addTestFixtures(0)
 }
 
-func TestCanPerform(t *testing.T) {
+func TestHasPermission(t *testing.T) {
 	// Set up cleaner hook
 	cleaner := deleteCreatedEntities(db)
 	defer cleaner()
 
-	addTestFixtures(5)
+	asserts := assert.New(t)
+	addTestFixtures(1)
+	user, _ := u.GetByEmail("userModel1@yahoo.com")
+
+	testCases := []struct{
+		name		string
+		resource	string
+		action		string
+		expected	bool
+	}{
+		{
+			"Can create/register user",
+			"User",
+			"Create",
+			true,
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			allowed := user.HasPermission(testCase.resource, testCase.action)
+			asserts.Equal(testCase.expected, allowed)
+		})
+	}
 }
 
 // Get ID of Regular User role

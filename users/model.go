@@ -79,3 +79,18 @@ func GetByEmail(email string) (User, error) {
 
 	return user, err
 }
+
+// Checks whether user has permission to execute action on
+// the resource
+func (u* User) HasPermission(resource string, action string) bool {
+	for _, p := range u.Role.Policies {
+		// Check for the resource first
+		if p.Resource != resource {
+			continue
+		}
+
+		return p.GetFieldValueByName(action)
+	}
+
+ 	return false
+}

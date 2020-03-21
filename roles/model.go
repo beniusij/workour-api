@@ -3,21 +3,11 @@ package roles
 import (
 	"github.com/jinzhu/gorm"
 	"log"
+	"reflect"
 	"workour-api/config"
 )
 
 const defaultRoleId = "Regular User"
-
-type Policy struct {
-	gorm.Model
-	RoleId		uint
-	Resource 	string `gorm:"not null"`
-	Index		bool
-	Create 		bool
-	Read 		bool
-	Update 		bool
-	Delete 		bool
-}
 
 type Role struct {
 	gorm.Model
@@ -47,4 +37,22 @@ func GetRoleById(id uint) Role {
 	db.First(&role)
 
 	return role
+}
+
+type Policy struct {
+	gorm.Model
+	RoleId		uint
+	Resource 	string `gorm:"not null"`
+	Index		bool
+	Create 		bool
+	Read 		bool
+	Update 		bool
+	Delete 		bool
+}
+
+// Gets field value by field name
+func (p* Policy) GetFieldValueByName(fieldName string) bool {
+	r := reflect.ValueOf(p)
+	a := reflect.Indirect(r).FieldByName(fieldName)
+	return a.Bool()
 }
