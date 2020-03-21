@@ -3,6 +3,7 @@ package tests
 import (
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/stretchr/testify/assert"
 	"strings"
 	"testing"
 	"time"
@@ -117,7 +118,7 @@ func initTestToken() (StubAuthToken, error) {
 // ---------------------------------------------------------------------------
 
 func TestGenerateToken(t *testing.T) {
-	asserts := getAsserts(t)
+	asserts := assert.New(t)
 	token, err := initTestToken()
 
 	// Verify that generated string matches JWT token regex
@@ -131,7 +132,7 @@ func TestGenerateToken(t *testing.T) {
 }
 
 func TestValidateToken(t *testing.T) {
-	asserts := getAsserts(t)
+	asserts := assert.New(t)
 	token, err := initTestToken()
 
 	asserts.NoError(err, "should not return error")
@@ -145,7 +146,7 @@ func TestValidateToken(t *testing.T) {
 }
 
 func TestDecodeToken(t *testing.T) {
-	asserts := getAsserts(t)
+	asserts := assert.New(t)
 	token, _ := initTestToken()
 
 	t.Run("valid token should be decodeable and return map with email and exp", func(t *testing.T) {
@@ -174,7 +175,7 @@ func TestDecodeToken(t *testing.T) {
 }
 
 func TestRefreshToken(t *testing.T) {
-	asserts := getAsserts(t)
+	asserts := assert.New(t)
 	token, _ := initTestToken()
 
 	oldToken := token.token

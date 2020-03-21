@@ -7,7 +7,6 @@ import (
 	"github.com/graphql-go/graphql"
 	"github.com/jinzhu/gorm"
 	"github.com/stretchr/testify/assert"
-	"testing"
 	"workour-api/config"
 	"workour-api/gql"
 	"workour-api/roles"
@@ -42,14 +41,6 @@ func initTestAPI() *gin.Engine {
 	router.POST(publicEndpoint, gql.GraphQL(schema))
 
 	return router
-}
-
-func getAsserts(t *testing.T) *assert.Assertions {
-	if asserts == nil {
-		asserts = assert.New(t)
-	}
-
-	return asserts
 }
 
 // ------------------------------------------------------------------------------
@@ -113,12 +104,8 @@ func deleteCreatedEntities(db *gorm.DB) func() {
 // ------------------------------- Mock ------------------------------------
 // -------------------------------------------------------------------------
 
-func userMocker(n int) []u.User {
-	var offset int
-	var ret []u.User
-	db.Model(&u.User{}).Count(&offset)
-
-	for i := offset + 1; i <= offset+n; i++ {
+func userMocker(n int) {
+	for i := 1; i <= n; i++ {
 		user := u.User{
 			Email: fmt.Sprintf("userModel%v@yahoo.com", i),
 			FirstName: fmt.Sprintf("User%v", i),
@@ -127,10 +114,7 @@ func userMocker(n int) []u.User {
 		}
 		_ = user.SetPassword("Password123")
 		db.Create(&user)
-		ret = append(ret, user)
 	}
-
-	return ret
 }
 
 func roleMocker() {

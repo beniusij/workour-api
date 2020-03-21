@@ -37,6 +37,10 @@ var loginTestCases = []struct{
 }
 
 func TestAuthenticateUser(t *testing.T) {
+	// Set up cleaner hook
+	cleaner := deleteCreatedEntities(db)
+	defer cleaner()
+
 	asserts, router := setUp(t)
 
 	// Login route to test login action in controller
@@ -68,6 +72,10 @@ func TestAuthenticateUser(t *testing.T) {
 }
 
 func TestAuthenticatedSessionStoredInSessionStorage(t *testing.T) {
+	// Set up cleaner hook
+	cleaner := deleteCreatedEntities(db)
+	defer cleaner()
+
 	_, router := setUp(t)
 
 	// Add login route with handler and authenticate as a test user
@@ -102,6 +110,10 @@ func TestAuthenticatedSessionStoredInSessionStorage(t *testing.T) {
 }
 
 func TestUserCanLogout(t *testing.T) {
+	// Set up cleaner hook
+	cleaner := deleteCreatedEntities(db)
+	defer cleaner()
+
 	asserts, router := setUp(t)
 	store := config.GetSessionStorage()
 
@@ -137,6 +149,10 @@ func TestUserCanLogout(t *testing.T) {
 }
 
 func TestSessionAuthenticationMiddleware(t *testing.T) {
+	// Set up cleaner hook
+	cleaner := deleteCreatedEntities(db)
+	defer cleaner()
+
 	asserts, router := setUp(t)
 
 	router.POST("/logout", auth.Controller{}.LogoutUser)
@@ -227,6 +243,10 @@ func TestSessionAuthenticationMiddleware(t *testing.T) {
 }
 
 func TestLoadUserMiddleware(t *testing.T) {
+	// Set up cleaner hook
+	cleaner := deleteCreatedEntities(db)
+	defer cleaner()
+
 	asserts, router := setUp(t)
 
 	router.GET("/ping", auth.LoadUser, func(c *gin.Context) {
@@ -255,6 +275,10 @@ func TestLoadUserMiddleware(t *testing.T) {
 }
 
 func TestGetCurrentUser(t *testing.T) {
+	// Set up cleaner hook
+	cleaner := deleteCreatedEntities(db)
+	defer cleaner()
+
 	asserts, router := setUp(t)
 
 	// Log in as user

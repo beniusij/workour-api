@@ -26,7 +26,7 @@ var unauthRequestTestCases = []struct{
 			db = config.InitTestDb()
 			migrate()
 
-			addTestFixtures(false)
+			roleMocker()
 		},
 		publicEndpoint,
 		"POST",
@@ -99,7 +99,7 @@ func TestWithoutAuth(t *testing.T) {
 	// Set up cleaner hook
 	cleaner := deleteCreatedEntities(db)
 	defer cleaner()
-
+	
 	asserts := assert.New(t)
 	r := initTestAPI()
 
