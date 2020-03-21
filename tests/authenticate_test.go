@@ -75,7 +75,7 @@ func TestAuthenticatedSessionStoredInSessionStorage(t *testing.T) {
 
 	// Stub route to test if authenticated user session is stored in session store
 	router.GET("/get", func(c *gin.Context) {
-		asserts := getAsserts(t)
+		asserts := assert.New(t)
 
 		// Get value from store using token as key
 		store := config.GetSessionStorage()
@@ -318,11 +318,14 @@ func hasRoute(r *gin.Engine, path string) bool {
 	return false
 }
 
+// Prepares for test by resetting database,
+// re-initialising Redis, getting asserts
+// and creating new router
 func setUp(t *testing.T) (a *assert.Assertions, r *gin.Engine) {
 	resetDb(true)
 	config.SetupSessionStorage()
 
-	a = getAsserts(t)
+	a = assert.New(t)
 	r = gin.New()
 
 	return

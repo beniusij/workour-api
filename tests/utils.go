@@ -59,7 +59,7 @@ func resetDb(addMock bool) {
 	db = config.InitTestDb()
 	migrate()
 
-	addMockRoles()
+	roleMocker()
 
 	if addMock {
 		userMocker(10)
@@ -98,20 +98,11 @@ func userMocker(n int) []u.User {
 	return ret
 }
 
-func addMockRoles() {
+func roleMocker() {
 	role := roles.Role{
 		Name:      "Regular User",
 		Authority: 1,
 		Policies:  nil,
 	}
 	db.Create(&role)
-}
-
-func newUserModel() u.User {
-	return u.User{
-		Email: "t3st@gmail.com",
-		FirstName: "Testas",
-		LastName: "Testavicius",
-		PasswordHash: "",
-	}
 }

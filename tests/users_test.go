@@ -15,8 +15,15 @@ const regularRoleId = "Regular User"
 func TestUserSettingAndCheckingPassword(t *testing.T) {
 	asserts := getAsserts(t)
 
+	// Set up test user
+	user := u.User{
+		Email: "t3st@gmail.com",
+		FirstName: "Testas",
+		LastName: "Testavicius",
+		PasswordHash: "",
+	}
+
 	// Testing User password feature
-	user := newUserModel()
 	err := user.CheckPassword("")
 	asserts.Error(err, "empty password should return err")
 
