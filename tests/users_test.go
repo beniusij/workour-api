@@ -44,7 +44,7 @@ func TestGetByEmail(t *testing.T) {
 	cleaner := deleteCreatedEntities(db)
 	defer cleaner()
 
-	addTestFixtures(true)
+	addTestFixtures(5)
 	asserts := assert.New(t)
 
 	email := "userModel1@yahoo.com"
@@ -67,7 +67,7 @@ func TestCreateUserResolver(t *testing.T) {
 
 	asserts := assert.New(t)
 	userValidator := u.NewUserValidator()
-	addTestFixtures(false)
+	addTestFixtures(0)
 
 	var (
 		args map[string]interface{}
@@ -145,10 +145,10 @@ func TestGetUserResolver(t *testing.T) {
 	// Set up cleaner hook
 	cleaner := deleteCreatedEntities(db)
 	defer cleaner()
-	
+
 	asserts := assert.New(t)
 	userEntity := u.User{}
-	addTestFixtures(true)
+	addTestFixtures(5)
 
 	t.Run("returns user with ID 1", func(t *testing.T) {
 		id := uint(1)
@@ -169,7 +169,15 @@ func TestGetUserResolver(t *testing.T) {
 		asserts.EqualError(err, expectedErr.Error(), "Attempt to fetch non-existent user should return an error")
 	})
 
-	addTestFixtures(false)
+	addTestFixtures(0)
+}
+
+func TestCanPerform(t *testing.T) {
+	// Set up cleaner hook
+	cleaner := deleteCreatedEntities(db)
+	defer cleaner()
+
+	addTestFixtures(5)
 }
 
 // Get ID of Regular User role

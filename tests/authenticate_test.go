@@ -346,7 +346,7 @@ func hasRoute(r *gin.Engine, path string) bool {
 // re-initialising Redis, getting asserts
 // and creating new router
 func setUp(t *testing.T) (a *assert.Assertions, r *gin.Engine) {
-	addTestFixtures(true)
+	addTestFixtures(5)
 	config.SetupSessionStorage()
 
 	a = assert.New(t)

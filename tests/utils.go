@@ -47,12 +47,9 @@ func initTestAPI() *gin.Engine {
 // ------------------------------- Database utils -------------------------------
 // ------------------------------------------------------------------------------
 
-func addTestFixtures(addUserMocks bool) {
+func addTestFixtures(usersCount int) {
 	roleMocker()
-
-	if addUserMocks {
-		userMocker(10)
-	}
+	userMocker(usersCount)
 }
 
 func migrate() {
