@@ -2,6 +2,7 @@ package tests
 
 import (
 	"bytes"
+	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -21,10 +22,11 @@ var unauthRequestTestCases = []struct{
 	//----------------------- Test cases for registering user ----------------------
 	{
 		func(r *http.Request) {
-			//_ = config.ResetTestDb(db)
-			//db = config.InitTestDb()
-			//migrate()
-			resetDb(false)
+			_ = config.ResetTestDb(db)
+			db = config.InitTestDb()
+			migrate()
+
+			addTestFixtures(false)
 		},
 		publicEndpoint,
 		"POST",
@@ -95,10 +97,10 @@ func TestMain(m *testing.M) {
 
 func TestWithoutAuth(t *testing.T) {
 	// Set up cleaner hook
-	cleaner := DeleteCreatedEntities(db)
+	cleaner := deleteCreatedEntities(db)
 	defer cleaner()
 
-	asserts := getAsserts(t)
+	asserts := assert.New(t)
 	r := initTestAPI()
 
 	for _, tc := range unauthRequestTestCases {

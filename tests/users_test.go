@@ -3,6 +3,7 @@ package tests
 import (
 	"errors"
 	"fmt"
+	"github.com/stretchr/testify/assert"
 	"log"
 	"testing"
 	"workour-api/config"
@@ -14,9 +15,9 @@ const regularRoleId = "Regular User"
 
 func TestUserSettingAndCheckingPassword(t *testing.T) {
 	// Set up cleaner hook
-	cleaner := DeleteCreatedEntities(db)
+	cleaner := deleteCreatedEntities(db)
 	defer cleaner()
-	asserts := getAsserts(t)
+	asserts := assert.New(t)
 
 	// Set up test user
 	user := u.User{
@@ -42,12 +43,13 @@ func TestUserSettingAndCheckingPassword(t *testing.T) {
 }
 
 func TestGetByEmail(t *testing.T) {
+	addTestFixtures(true)
+
 	// Set up cleaner hook
-	cleaner := DeleteCreatedEntities(db)
+	cleaner := deleteCreatedEntities(db)
 	defer cleaner()
 
-	asserts := getAsserts(t)
-	resetDb(true)
+	asserts := assert.New(t)
 
 	email := "userModel1@yahoo.com"
 	user, err := u.GetByEmail(email)
@@ -64,16 +66,17 @@ func TestGetByEmail(t *testing.T) {
 
 func TestCreateUserResolver(t *testing.T) {
 	// Set up cleaner hook
-	cleaner := DeleteCreatedEntities(db)
+	cleaner := deleteCreatedEntities(db)
 	defer cleaner()
 
-	asserts := getAsserts(t)
+	asserts := assert.New(t)
 	userValidator := u.NewUserValidator()
+	addTestFixtures(false)
+
 	var (
 		args map[string]interface{}
 		err, expectedErr error
 	)
-	resetDb(false)
 
 	// Init faulty testing data
 	var faultyData = []struct{
@@ -137,21 +140,19 @@ func TestCreateUserResolver(t *testing.T) {
 
 		// Assert response return
 		asserts.Nil(err, "New userModel created with validated data")
-		asserts.Equal(uint(1), user.ID, "User has ID 1")
+		asserts.Equal(args["email"], user.Email, "User has email")
 		asserts.Equal(getRegularUserRoleId(), user.RoleId, "Created user has default role")
 	})
-
-	resetDb(false)
 }
 
 func TestGetUserResolver(t *testing.T) {
 	// Set up cleaner hook
-	cleaner := DeleteCreatedEntities(db)
+	cleaner := deleteCreatedEntities(db)
 	defer cleaner()
 
-	asserts := getAsserts(t)
+	asserts := assert.New(t)
 	userEntity := u.User{}
-	resetDb(true)
+	addTestFixtures(true)
 
 	t.Run("returns user with ID 1", func(t *testing.T) {
 		id := uint(1)
@@ -172,7 +173,7 @@ func TestGetUserResolver(t *testing.T) {
 		asserts.EqualError(err, expectedErr.Error(), "Attempt to fetch non-existent user should return an error")
 	})
 
-	resetDb(false)
+	addTestFixtures(false)
 }
 
 // Get ID of Regular User role

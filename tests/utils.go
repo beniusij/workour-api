@@ -56,10 +56,10 @@ func getAsserts(t *testing.T) *assert.Assertions {
 // ------------------------------- Database utils -------------------------------
 // ------------------------------------------------------------------------------
 
-func resetDb(addMock bool) {
+func addTestFixtures(addUserMocks bool) {
 	roleMocker()
 
-	if addMock {
+	if addUserMocks {
 		userMocker(10)
 	}
 }
@@ -72,7 +72,7 @@ func migrate() {
 	)
 }
 
-func DeleteCreatedEntities(db *gorm.DB) func() {
+func deleteCreatedEntities(db *gorm.DB) func() {
 	type entity struct {
 		table   string
 		keyname string
