@@ -75,9 +75,24 @@ func GetByEmail(email string) (User, error) {
 	db := config.GetDB()
 	user := User{}
 
+	// Get User
 	err := db.Where("email = ?", email).Find(&user).Error
+	if err != nil {
+		return user, err
+	}
+
+	// Update User with email
+	err = user.GetUserRole()
 
 	return user, err
+}
+
+// Update User struct with Role struct
+func (u* User) GetUserRole() error {
+	u.Role.ID = u.RoleId
+	err := u.Role.GetById()
+
+	return err
 }
 
 // Checks whether user has permission to execute action on

@@ -28,6 +28,14 @@ func GetDefaultRoleId() uint {
 	return role.ID
 }
 
+// Get role by its ID
+func (r* Role) GetById() error {
+	db := config.GetDB()
+	err := db.Where(&r).First(&r).Error
+
+	return err
+}
+
 // Get Role and its Policies by role id
 func GetRoleById(id uint) Role {
 	db := config.GetDB()

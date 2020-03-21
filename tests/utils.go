@@ -14,6 +14,7 @@ import (
 )
 
 const publicEndpoint = "/public"
+const defaultRole = "Regular User"
 
 var db *gorm.DB
 var asserts *assert.Assertions
@@ -136,7 +137,7 @@ func roleMocker() {
 
 	// Set up default user role
 	role := roles.Role{
-		Name:      "Regular User",
+		Name:      defaultRole,
 		Authority: 1,
 		Policies:  policies,
 	}

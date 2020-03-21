@@ -47,17 +47,22 @@ func TestGetByEmail(t *testing.T) {
 	addTestFixtures(5)
 	asserts := assert.New(t)
 
-	email := "userModel1@yahoo.com"
-	user, err := u.GetByEmail(email)
+	t.Run("Should get user by email", func(t *testing.T) {
+		email := "userModel1@yahoo.com"
+		user, err := u.GetByEmail(email)
 
-	asserts.NoError(err, "no errors are returned when fetching user by email")
-	asserts.EqualValues(email, user.Email, "user fetched has the same email as the one used for getting user")
+		asserts.NoError(err, "no errors are returned when fetching user by email")
+		asserts.EqualValues(email, user.Email, "user fetched has the same email as the one used for getting user")
+		asserts.Equal(defaultRole, user.Role.Name, "user has default role assigned")
+	})
 
-	invalidEmail := "invalid@email.com"
-	user, err = u.GetByEmail(invalidEmail)
+	t.Run("Should not get user and return error", func(t *testing.T) {
+		invalidEmail := "invalid@email.com"
+		user, err := u.GetByEmail(invalidEmail)
 
-	asserts.Error(err, "record not found")
-	asserts.Equal(uint(0), user.ID, "no user is returned for the invalid email")
+		asserts.Error(err, "record not found")
+		asserts.Equal(uint(0), user.ID, "no user is returned for the invalid email")
+	})
 }
 
 func TestCreateUserResolver(t *testing.T) {
