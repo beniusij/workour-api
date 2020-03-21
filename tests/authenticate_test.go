@@ -146,69 +146,84 @@ func TestSessionAuthenticationMiddleware(t *testing.T) {
 		})
 	})
 
-	// TODO: refactor into slice of test cases
-	//testCase := []struct{
-	//	case string
-	//}{}
-
-	// Make a call to the protected route without a cookie in the request
-	request, err := http.NewRequest("GET", "/ping", nil)
-	logErr(err)
-	response := httptest.NewRecorder()
-	router.ServeHTTP(response, request)
-
-	// Should fail and return response 403 with error "No authentication cookie
-	// present"
-	asserts.Equal(http.StatusForbidden, response.Code, "No valid cookie, thus access is forbidden")
-	asserts.True(strings.Contains(response.Body.String(), "No session cookie present"))
-
-	// Send request with fake cookie
-	request.Header.Add("Cookie", fmt.Sprintf("%s=FakeCookie", auth.CookieName))
-	response = httptest.NewRecorder()
-	router.ServeHTTP(response, request)
-
-	// Should return response 403 with error "No existing sessions were found.
-	// Please, log in."
-	asserts.Equal(http.StatusForbidden, response.Code, "Invalid cookie, thus access is forbidden")
-	asserts.True(strings.Contains(response.Body.String(), "Error occurred while getting session"))
-
-	// Authenticate as test user
-	cookie := authTestUser(router)
-
-	// Log out
-	request, _ = http.NewRequest("POST", "/logout", nil)
-	request.Header.Add("Cookie", cookie)
-	response = httptest.NewRecorder()
-	router.ServeHTTP(response, request)
-
-	// Send request to the protected route
-	request, _ = http.NewRequest("GET", "/ping", nil)
-	request.Header.Add("Cookie", cookie)
-	response = httptest.NewRecorder()
-	router.ServeHTTP(response, request)
-
-	// Should return response 403 with error "Session MaxAge is -1, session ought
-	// to be terminated. Try logging in again"
-	asserts.Equal(http.StatusForbidden, response.Code, "Invalid cookie, thus access is forbidden")
-	asserts.True(
-		strings.Contains(
-			response.Body.String(),
+	testCases := []struct{
+		t 				string
+		cookie 			string
+		status			int
+		responseBody 	string
+		login			bool
+		logout			bool
+	}{
+		{
+			`Should fail and return response 403 with error "No authentication cookie present"`,
+			"",
+			http.StatusForbidden,
+			"No session cookie present",
+			false,
+			false,
+		},
+		{
+			`Should return response 403 with error "No existing sessions were found. Please, log in."`,
+			fmt.Sprintf("%s=FakeCookie", auth.CookieName),
+			http.StatusForbidden,
+			"Error occurred while getting session",
+			false,
+			false,
+		},
+		{
+			`Should authenticate and return response with HTTP code 200`,
+			"",
+			http.StatusOK,
+			"Request received",
+			true,
+			false,
+		},
+		{
+			`Should return response 403 with error "Session MaxAge is -1, session ought to be terminated. Try logging in again"`,
+			"",
+			http.StatusForbidden,
 			"No existing sessions were found. Please, log in.",
-		),
-	)
+			true,
+			true,
+		},
+	}
 
-	// Authenticate as test user
-	authTestUser(router)
+	for _, testCase := range testCases {
+		t.Run(testCase.t, func(t *testing.T) {
+			var (
+				cookie 		string
+				err			error
+				request		*http.Request
+				response	*httptest.ResponseRecorder
+			)
 
-	// Send request to protected route
-	request, _ = http.NewRequest("GET", "/ping", nil)
-	request.Header.Add("Cookie", cookie)
-	response = httptest.NewRecorder()
-	router.ServeHTTP(response, request)
+			if testCase.cookie != "" {
+				cookie = testCase.cookie
+			} else if testCase.login {
+				cookie = authTestUser(router)
+			}
 
-	// Should return response with HTTP code 200
-	asserts.Equal(http.StatusOK, response.Code, "Valid cookie, thus access is not prevented")
-	asserts.True(strings.Contains(response.Body.String(), "Request received"))
+			if testCase.logout {
+				request, _ = http.NewRequest("POST", "/logout", nil)
+				request.Header.Add("Cookie", cookie)
+				response = httptest.NewRecorder()
+				router.ServeHTTP(response, request)
+			}
+
+			request, err = http.NewRequest("GET", "/ping", nil)
+			logErr(err)
+
+			if cookie != "" {
+				request.Header.Add("Cookie", cookie)
+			}
+
+			response = httptest.NewRecorder()
+			router.ServeHTTP(response, request)
+
+			asserts.Equal(testCase.status, response.Code, "Incorrect response status")
+			asserts.True(strings.Contains(response.Body.String(), testCase.responseBody))
+		})
+	}
 }
 
 func TestLoadUserMiddleware(t *testing.T) {
