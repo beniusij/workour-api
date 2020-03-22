@@ -198,6 +198,24 @@ func TestHasPermission(t *testing.T) {
 			"Create",
 			true,
 		},
+		{
+			"Can't update roles and permissons",
+			"Roles",
+			"Update",
+			false,
+		},
+		{
+			"Can't do actions that don't exist",
+			"Roles",
+			"Terminate",
+			false,
+		},
+		//{
+		//	"Can't take actions against resource that does not exist",
+		//	"Documents",
+		//	"Create",
+		//	false,
+		//},
 	}
 
 	for _, testCase := range testCases {

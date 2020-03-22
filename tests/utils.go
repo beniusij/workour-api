@@ -6,7 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/graphql-go/graphql"
 	"github.com/jinzhu/gorm"
-	"github.com/stretchr/testify/assert"
 	"workour-api/config"
 	"workour-api/gql"
 	"workour-api/roles"
@@ -17,7 +16,6 @@ const publicEndpoint = "/public"
 const defaultRole = "Regular User"
 
 var db *gorm.DB
-var asserts *assert.Assertions
 
 // ------------------------------------------------------------------------------------
 // ------------------------------- Tools initialisation -------------------------------

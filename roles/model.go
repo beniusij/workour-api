@@ -51,6 +51,26 @@ type Policy struct {
 // Gets field value by field name
 func (p* Policy) GetFieldValueByName(fieldName string) bool {
 	r := reflect.ValueOf(p)
+
+	if !hasField(r, fieldName) {
+		return false
+	}
+
 	a := reflect.Indirect(r).FieldByName(fieldName)
+
 	return a.Bool()
+}
+
+func hasField(v reflect.Value, fieldName string) bool {
+	structElem := v.Elem()
+	structType := structElem.Type()
+
+	for i := 0;  i < structElem.NumField(); i++ {
+		field := structType.Field(i).Name
+		if field == fieldName {
+			return true
+		}
+	}
+
+	return false
 }
