@@ -96,14 +96,19 @@ func (ctrl Controller) GetCurrentUser(c *gin.Context) {
 		log.Println(fmt.Sprintf("Error occurred while getting current user: %v", err))
 	}
 
-	roleId := session.Values["role_id"].(uint)
+	role := roles.Role{}
+	role.ID = session.Values["role_id"].(uint)
+	err = role.GetById()
+	if err != nil {
+		log.Println(fmt.Sprintf("Error occurred while getting role: %v", err))
+	}
 
 	profile := Profile{
 		Id: session.Values["id"].(uint),
 		Email: session.Values["email"].(string),
 		FirstName: session.Values["first_name"].(string),
 		LastName: session.Values["last_name"].(string),
-		Role: roles.GetRoleById(roleId),
+		Role: role,
 	}
 
 	profileJson, err := json.Marshal(&profile)

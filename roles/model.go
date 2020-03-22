@@ -16,6 +16,15 @@ type Role struct {
 	Policies 	[]Policy `gorm:"foreignkey:RoleId"`
 }
 
+// Get role by its ID
+func (r* Role) GetById() error {
+	db := config.GetDB()
+	err := db.First(&r).Related(&r.Policies).Error
+
+	return err
+}
+
+// Get default role's ID
 func GetDefaultRoleId() uint {
 	db := config.GetDB()
 	role := Role{Name: defaultRoleId}
@@ -26,25 +35,6 @@ func GetDefaultRoleId() uint {
 	}
 
 	return role.ID
-}
-
-// Get role by its ID
-func (r* Role) GetById() error {
-	db := config.GetDB()
-	err := db.Where(&r).First(&r).Error
-
-	return err
-}
-
-// Get Role and its Policies by role id
-func GetRoleById(id uint) Role {
-	db := config.GetDB()
-	role := Role{}
-
-	role.ID = id
-	db.First(&role)
-
-	return role
 }
 
 type Policy struct {
