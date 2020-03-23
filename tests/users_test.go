@@ -210,12 +210,12 @@ func TestHasPermission(t *testing.T) {
 			"Terminate",
 			false,
 		},
-		//{
-		//	"Can't take actions against resource that does not exist",
-		//	"Documents",
-		//	"Create",
-		//	false,
-		//},
+		{
+			"Can't take actions against resource that does not exist",
+			"Documents",
+			"Create",
+			false,
+		},
 	}
 
 	for _, testCase := range testCases {
