@@ -61,5 +61,5 @@ func publicRoutes(r *gin.Engine) {
 // Set up role-protected routes
 func adminRoutes(r *gin.Engine) {
 	admin := r.Group("/admin")
-	admin.Use(auth.VerifyAuthentication())
+	admin.Use(auth.VerifyAuthentication)
 }
