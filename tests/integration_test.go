@@ -2,12 +2,12 @@ package tests
 
 import (
 	"bytes"
+	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"testing"
 	"workour-api/config"
-	u "workour-api/users"
 )
 
 var unauthRequestTestCases = []struct{
@@ -22,7 +22,11 @@ var unauthRequestTestCases = []struct{
 	//----------------------- Test cases for registering user ----------------------
 	{
 		func(r *http.Request) {
-			resetDb(false)
+			_ = config.ResetTestDb(db)
+			db = config.InitTestDb()
+			migrate()
+
+			roleMocker()
 		},
 		publicEndpoint,
 		"POST",
@@ -79,15 +83,24 @@ var unauthRequestTestCases = []struct{
 }
 
 func TestMain(m *testing.M) {
+	// Pre-testing setup
 	db = config.InitTestDb()
-	db.AutoMigrate(u.User{})
-	exitval := m.Run()
+	migrate()
+
+	exitValue := m.Run()
+
+	// Post-testing cleanup
 	_ = config.ResetTestDb(db)
-	os.Exit(exitval)
+
+	os.Exit(exitValue)
 }
 
 func TestWithoutAuth(t *testing.T) {
-	asserts := getAsserts(t)
+	// Set up cleaner hook
+	cleaner := deleteCreatedEntities(db)
+	defer cleaner()
+	
+	asserts := assert.New(t)
 	r := initTestAPI()
 
 	for _, tc := range unauthRequestTestCases {

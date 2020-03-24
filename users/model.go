@@ -4,14 +4,17 @@ import (
 	"errors"
 	"golang.org/x/crypto/bcrypt"
 	"workour-api/config"
+	"workour-api/roles"
 )
 
 type User struct {
-	ID				uint	`gorm:"primary_key"`
-	Email			string	`gorm:"column:email;type:varchar(100);unique_index"`
-	FirstName		string	`gorm:"column:first_name"`
-	LastName		string	`gorm:"column:last_name"`
-	PasswordHash	string	`gorm:"column:password;not null"`
+	ID				uint		`gorm:"primary_key"`
+	Role			roles.Role 	`gorm:"foreignkey:RoleId"`
+	RoleId			uint		`gorm:"not null"`
+	Email			string		`gorm:"unique"`
+	FirstName		string
+	LastName		string
+	PasswordHash	string		`gorm:"column:password;not null"`
 }
 
 func (u *User) SetPassword(password string) error {
@@ -40,35 +43,69 @@ func (u *User) CheckPassword(password string) error {
 	return nil
 }
 
-func (u User) Save(data interface{}) (uint, error) {
+func (u User) Save(data interface{}) (User, error) {
 	db := config.GetDB()
 	user := data.(User)
-	err := db.Create(&user).Error
 
-	if err != nil {
-		return 0, err
+	// Check and get default role
+	if user.RoleId == uint(0) {
+		user.RoleId	= roles.GetDefaultRoleId()
 	}
 
-	return user.ID, nil
-}
-
-func (u User) GetById(id uint) (User, error) {
-	db := config.GetDB()
-	user := User{}
-	err := db.Where(&User{ID: id}).First(&user).Error
-
+	err := db.Create(&user).Error
 	if err != nil {
-		return user, err
+		return User{}, err
 	}
 
 	return user, nil
+}
+
+func (u* User) GetById() error {
+	db := config.GetDB()
+	err := db.Where(&u).First(&u).Error
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func GetByEmail(email string) (User, error) {
 	db := config.GetDB()
 	user := User{}
 
+	// Get User
 	err := db.Where("email = ?", email).Find(&user).Error
+	if err != nil {
+		return user, err
+	}
+
+	// Update User with email
+	err = user.GetUserRole()
 
 	return user, err
+}
+
+// Update User struct with Role struct
+func (u* User) GetUserRole() error {
+	u.Role.ID = u.RoleId
+	err := u.Role.GetById()
+
+	return err
+}
+
+// Checks whether user has permission to execute action on
+// the resource
+func (u* User) HasPermission(resource string, action string) bool {
+	for _, p := range u.Role.Policies {
+		// Check for the resource first
+		if p.Resource != resource {
+			continue
+		}
+
+		return p.GetFieldValueByName(action)
+	}
+
+ 	return false
 }

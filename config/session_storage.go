@@ -8,17 +8,6 @@ import (
 
 var store *redis.RediStore
 
-// Initialise persistence cache with Redis
-//func SetupSessionStorage(r *gin.Engine) {
-//	address := fmt.Sprintf("%s:%s", host, port)
-//	store, err := redis.NewStore(10, "tcp", address, psw, []byte(secret))
-//	if err != nil {
-//		panic(err)
-//	}
-//
-//	r.Use(sessions.Sessions("auth_sessions", store))
-//}
-
 var (
 	host 	string
 	port 	string

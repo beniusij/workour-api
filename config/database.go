@@ -37,10 +37,6 @@ func InitDb() *gorm.DB {
 	return DB
 }
 
-func GetDB() *gorm.DB {
-	return DB
-}
-
 func InitTestDb() * gorm.DB {
 	testDb, err := gorm.Open("sqlite3", testDbPath)
 	if err != nil {
@@ -57,4 +53,8 @@ func ResetTestDb(db *gorm.DB) error {
 	db.Close()
 	err := os.Remove(testDbPath)
 	return err
+}
+
+func GetDB() *gorm.DB {
+	return DB
 }

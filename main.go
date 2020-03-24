@@ -6,13 +6,11 @@ import (
 	"github.com/subosito/gotenv"
 	"os"
 	"workour-api/config"
+	r "workour-api/roles"
 	u "workour-api/users"
 )
 
-var (
-	appPort = os.Getenv("GIN_PORT")
-
-)
+var appPort = os.Getenv("GIN_PORT")
 
 func init() {
 	// Load .env variables
@@ -34,7 +32,11 @@ func main() {
 func Migrate(db *gorm.DB) {
 	db.AutoMigrate(
 		u.User{},
+		r.Policy{},
+		r.Role{},
 	)
+
+	r.CreateDefaultRoles()
 }
 
 func initAPI() (*gin.Engine, *gorm.DB) {

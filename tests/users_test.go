@@ -2,15 +2,29 @@ package tests
 
 import (
 	"errors"
+	"fmt"
+	"github.com/stretchr/testify/assert"
+	"log"
 	"testing"
+	"workour-api/config"
+	"workour-api/roles"
 	u "workour-api/users"
 )
 
+const regularRoleId = "Regular User"
+
 func TestUserSettingAndCheckingPassword(t *testing.T) {
-	asserts := getAsserts(t)
+	asserts := assert.New(t)
+
+	// Set up test user
+	user := u.User{
+		Email: "t3st@gmail.com",
+		FirstName: "Testas",
+		LastName: "Testavicius",
+		PasswordHash: "",
+	}
 
 	// Testing User password feature
-	user := newUserModel()
 	err := user.CheckPassword("")
 	asserts.Error(err, "empty password should return err")
 
@@ -26,30 +40,44 @@ func TestUserSettingAndCheckingPassword(t *testing.T) {
 }
 
 func TestGetByEmail(t *testing.T) {
-	asserts := getAsserts(t)
-	resetDb(true)
+	// Set up cleaner hook
+	cleaner := deleteCreatedEntities(db)
+	defer cleaner()
 
-	email := "userModel1@yahoo.com"
-	user, err := u.GetByEmail(email)
+	addTestFixtures(5)
+	asserts := assert.New(t)
 
-	asserts.NoError(err, "no errors are returned when fetching user by email")
-	asserts.EqualValues(email, user.Email, "user fetched has the same email as the one used for getting user")
+	t.Run("Should get user by email", func(t *testing.T) {
+		email := "userModel1@yahoo.com"
+		user, err := u.GetByEmail(email)
 
-	invalidEmail := "invalid@email.com"
-	user, err = u.GetByEmail(invalidEmail)
+		asserts.NoError(err, "no errors are returned when fetching user by email")
+		asserts.EqualValues(email, user.Email, "user fetched has the same email as the one used for getting user")
+		asserts.Equal(defaultRole, user.Role.Name, "user has default role assigned")
+	})
 
-	asserts.Error(err, "record not found")
-	asserts.Equal(uint(0), user.ID, "no user is returned for the invalid email")
+	t.Run("Should not get user and return error", func(t *testing.T) {
+		invalidEmail := "invalid@email.com"
+		user, err := u.GetByEmail(invalidEmail)
+
+		asserts.Error(err, "record not found")
+		asserts.Equal(uint(0), user.ID, "no user is returned for the invalid email")
+	})
 }
 
 func TestCreateUserResolver(t *testing.T) {
-	asserts := getAsserts(t)
+	// Set up cleaner hook
+	cleaner := deleteCreatedEntities(db)
+	defer cleaner()
+
+	asserts := assert.New(t)
 	userValidator := u.NewUserValidator()
+	addTestFixtures(0)
+
 	var (
 		args map[string]interface{}
 		err, expectedErr error
 	)
-	resetDb(false)
 
 	// Init faulty testing data
 	var faultyData = []struct{
@@ -109,50 +137,104 @@ func TestCreateUserResolver(t *testing.T) {
 		asserts.Nil(err, "Form data validated and should not return error")
 
 		userModel := u.User{}
-		userId, err := userModel.Save(userValidator.UserModel)
+		user, err := userModel.Save(userValidator.UserModel)
 
 		// Assert response return
 		asserts.Nil(err, "New userModel created with validated data")
-		asserts.Equal(uint(1), userId, "User has ID 1")
+		asserts.Equal(args["email"], user.Email, "User has email")
+		asserts.Equal(getRegularUserRoleId(), user.RoleId, "Created user has default role")
 	})
-
-	resetDb(false)
 }
 
 func TestGetUserResolver(t *testing.T) {
-	asserts := getAsserts(t)
+	// Set up cleaner hook
+	cleaner := deleteCreatedEntities(db)
+	defer cleaner()
+
+	asserts := assert.New(t)
 	userEntity := u.User{}
-	userMocker(10)
-	var (
-		id		uint
-		args 	map[string]interface{}
-		err		error
-		user	u.User
-	)
+	addTestFixtures(5)
 
 	t.Run("returns user with ID 1", func(t *testing.T) {
-		id = 1
-		args = map[string]interface{}{
-			"id":	id,
-		}
+		id := uint(1)
+		userEntity.ID = id
 
-		user, err = userEntity.GetById(args["id"].(uint))
+		err := userEntity.GetById()
 		asserts.Nil(err, "Successfully fetched user by ID, no erros")
-		asserts.Equalf(id, user.ID, "Successfully fetched user with ID %v", id)
-		asserts.IsType(u.User{}, user, "Should return object of User interface")
+		asserts.Equalf(id, userEntity.ID, "Successfully fetched user with ID %v", id)
+		asserts.IsType(u.User{}, userEntity, "Should return object of User interface")
 	})
 
 	t.Run("returns nil for non-existing user", func(t *testing.T) {
-		id = 101
-		args = map[string]interface{}{
-			"id": id,
-		}
+		id := uint(101)
+		userEntity.ID = id
 
-		user, err = userEntity.GetById(args["id"].(uint))
+		err := userEntity.GetById()
 		expectedErr := errors.New("record not found")
-		asserts.Equal(uint(0), user.ID, "Attempt to fetch non-existent user returns empty struct")
 		asserts.EqualError(err, expectedErr.Error(), "Attempt to fetch non-existent user should return an error")
 	})
 
-	resetDb(false)
+	addTestFixtures(0)
+}
+
+func TestHasPermission(t *testing.T) {
+	// Set up cleaner hook
+	cleaner := deleteCreatedEntities(db)
+	defer cleaner()
+
+	asserts := assert.New(t)
+	addTestFixtures(1)
+	user, _ := u.GetByEmail("userModel1@yahoo.com")
+
+	testCases := []struct{
+		name		string
+		resource	string
+		action		string
+		expected	bool
+	}{
+		{
+			"Can create/register user",
+			"User",
+			"Create",
+			true,
+		},
+		{
+			"Can't update roles and permissons",
+			"Roles",
+			"Update",
+			false,
+		},
+		{
+			"Can't do actions that don't exist",
+			"Roles",
+			"Terminate",
+			false,
+		},
+		{
+			"Can't take actions against resource that does not exist",
+			"Documents",
+			"Create",
+			false,
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			allowed := user.HasPermission(testCase.resource, testCase.action)
+			asserts.Equal(testCase.expected, allowed)
+		})
+	}
+}
+
+// Get ID of Regular User role
+func getRegularUserRoleId() uint {
+	db := config.GetDB()
+	role := roles.Role{Name: regularRoleId}
+
+	err := db.First(&role).Error
+	if err != nil {
+		log.Println(fmt.Sprintf("Error while grabbing regular user role: %v", err))
+	}
+
+	return role.ID
 }
