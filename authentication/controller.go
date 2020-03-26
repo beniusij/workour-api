@@ -96,6 +96,14 @@ func (ctrl Controller) GetCurrentUser(c *gin.Context) {
 		log.Println(fmt.Sprintf("Error occurred while getting current user: %v", err))
 	}
 
+	if session.IsNew {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": "User session not found",
+		})
+		c.Abort()
+		return
+	}
+
 	role := roles.Role{}
 	role.ID = session.Values["role_id"].(uint)
 	err = role.GetById()
