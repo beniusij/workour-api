@@ -4,25 +4,18 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
-	"log"
 	"os"
 	"workour-api/config"
 	r "workour-api/roles"
 	u "workour-api/users"
 )
 
-var PORT = os.Getenv("PORT")
-
 func main() {
-	if PORT != "" {
-		log.Fatal("$PORT must be set")
-	}
-
 	r, db := initAPI()
 	Migrate(db)
 	defer db.Close()
 
-	_ = r.Run(fmt.Sprintf(":%s", PORT))
+	_ = r.Run(fmt.Sprintf(":%s", os.Getenv("PORT")))
 }
 
 func Migrate(db *gorm.DB) {
