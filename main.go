@@ -1,32 +1,28 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
-	"github.com/subosito/gotenv"
+	"log"
 	"os"
 	"workour-api/config"
 	r "workour-api/roles"
 	u "workour-api/users"
 )
 
-var appPort = os.Getenv("GIN_PORT")
-
-func init() {
-	// Load .env variables
-	err := gotenv.Load()
-
-	if err != nil {
-		panic(err)
-	}
-}
+var PORT = os.Getenv("PORT")
 
 func main() {
+	if PORT != "" {
+		log.Fatal("$PORT must be set")
+	}
+
 	r, db := initAPI()
 	Migrate(db)
 	defer db.Close()
 
-	_ = r.Run(":8080")
+	_ = r.Run(fmt.Sprintf(":%s", PORT))
 }
 
 func Migrate(db *gorm.DB) {
