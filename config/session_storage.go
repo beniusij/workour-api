@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	redis "gopkg.in/boj/redistore.v1"
+	"log"
 	"os"
 )
 
@@ -35,11 +36,13 @@ func GetSessionStorage() *redis.RediStore {
 func setEnvVars() {
 	// Host defaults to localhost
 	if host = os.Getenv("REDIS_HOST"); host == "" {
+		log.Println("Setting default value for $REDIS_HOST")
 		host = "localhost"
 	}
 
 	// Port defaults to 6379
 	if port = os.Getenv("REDIS_PORT"); port == "" {
+		log.Println("Setting default value for $REDIS_PORT")
 		port = "6379"
 	}
 
@@ -49,6 +52,7 @@ func setEnvVars() {
 	// Secret is whatever the fuck you want
 	// Should not vary in environment
 	if secret = os.Getenv("REDIS_SECRET"); secret == "" {
+		log.Println("Setting default value for $REDIS_SECRET")
 		secret = "VerySecureSecret"
 	}
 }

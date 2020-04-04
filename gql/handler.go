@@ -16,10 +16,6 @@ type reqBody struct {
 // GraphQL returns an http.HandlerFunc to our /graphql endpoint
 func GraphQL(sc graphql.Schema) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.Writer.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
-		c.Writer.Header().Set("Access-Control-Request-Method","POST, OPTIONS")
-		c.Writer.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, Accept-Encoding")
-
 		// Check to ensure query was provided in the request body
 		if c.Request.Body == nil {
 			http.Error(c.Writer, "Must provide graphql query in request body", http.StatusBadRequest)

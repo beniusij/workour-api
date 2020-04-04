@@ -10,6 +10,7 @@ require (
 	github.com/gorilla/sessions v1.2.0
 	github.com/graphql-go/graphql v0.7.8
 	github.com/jinzhu/gorm v1.9.12
+	github.com/joho/godotenv v1.3.0
 	github.com/stretchr/testify v1.4.0
 	github.com/subosito/gotenv v1.2.0
 	golang.org/x/crypto v0.0.0-20200204104054-c9f3fb736b72

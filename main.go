@@ -4,11 +4,20 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
+	"github.com/joho/godotenv"
+	"log"
 	"os"
 	"workour-api/config"
 	r "workour-api/roles"
 	u "workour-api/users"
 )
+
+func init() {
+	// loads values from .env into the system
+	if err := godotenv.Load(); err != nil {
+		log.Print("No .env file found, will load runtime env variables")
+	}
+}
 
 func main() {
 	r, db := initAPI()
