@@ -28,7 +28,7 @@ func InitDb() *gorm.DB {
 	db, err := gorm.Open(driver, creds)
 
 	if err != nil {
-		fmt.Println(err)
+		panic(err)
 	}
 
 	db.DB().SetMaxIdleConns(10)

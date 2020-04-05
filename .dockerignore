@@ -1,1 +1,13 @@
+./Docker
 docker
+.dockerignore
+.env.dist
+.git
+.github
+.gitignore
+.idea
+Dockerfile
+Makefile
+Procfile
+docker-compose.yml
+tmp
