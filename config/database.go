@@ -8,22 +8,17 @@ import (
 	"os"
 )
 
+const testDbPath = "./../gorm_test.db"
 var DB *gorm.DB
-var testDbPath = "./../gorm_test.db"
 
 func InitDb() *gorm.DB {
 	var (
 		driver = "postgres"
-		dbUser = os.Getenv("DATABASE_USER")
-		dbPsw = os.Getenv("DATABASE_PSW")
-		dbHost = os.Getenv("DATABASE_HOST")
-		dbPort = os.Getenv("DATABASE_PORT")
-		dbName = os.Getenv("DATABASE_NAME")
-		dbSSL = os.Getenv("DATABASE_SSL")
+		dbc = NewDatabaseConfig()
 	)
 
 	creds := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s",
-		dbHost, dbPort, dbUser, dbName, dbPsw, dbSSL)
+		dbc.Host, dbc.Port, dbc.User, dbc.Name, dbc.Password, dbc.Secure)
 
 	db, err := gorm.Open(driver, creds)
 
@@ -38,7 +33,9 @@ func InitDb() *gorm.DB {
 }
 
 func InitTestDb() * gorm.DB {
-	testDb, err := gorm.Open("sqlite3", testDbPath)
+	var driver = "sqlite3"
+
+	testDb, err := gorm.Open(driver, testDbPath)
 	if err != nil {
 		panic(err)
 	}
