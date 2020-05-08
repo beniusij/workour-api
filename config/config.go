@@ -38,9 +38,11 @@ type Config struct {
 	Domain			string
 }
 
+var Configurations *Config
+
 // Returns a set of configs
-func New() *Config {
-	return &Config{
+func New() {
+	Configurations = &Config{
 		Port: 			getEnv("PORT", "8080"),
 		JWTSecret:		getEnv("JWT_SECRET", "ThisIsTokenSecret"),
 		CorsOrigins:	getEnvAsSlice("CORS_ORIGIN", []string{"http://localhost:3000"}, ","),

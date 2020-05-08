@@ -6,7 +6,6 @@ import (
 	"github.com/jinzhu/gorm"
 	"github.com/joho/godotenv"
 	"log"
-	"os"
 	"workour-api/config"
 	r "workour-api/roles"
 	u "workour-api/users"
@@ -17,6 +16,8 @@ func init() {
 	if err := godotenv.Load(); err != nil {
 		log.Print("No .env file found, will load runtime env variables")
 	}
+
+	config.New()
 }
 
 func main() {
@@ -24,7 +25,7 @@ func main() {
 	Migrate(db)
 	defer db.Close()
 
-	_ = r.Run(fmt.Sprintf(":%s", os.Getenv("PORT")))
+	_ = r.Run(fmt.Sprintf(":%s", config.Configurations.Port))
 }
 
 func Migrate(db *gorm.DB) {
