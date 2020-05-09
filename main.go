@@ -16,12 +16,12 @@ func init() {
 	if err := godotenv.Load(); err != nil {
 		log.Print("No .env file found, will load runtime env variables")
 	}
-
-	config.New()
 }
 
 func main() {
+	config.New()
 	r, db := initAPI()
+
 	Migrate(db)
 	defer db.Close()
 
