@@ -5,6 +5,7 @@ import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
+	"log"
 	"os"
 )
 
@@ -23,7 +24,7 @@ func InitDb() *gorm.DB {
 	db, err := gorm.Open(driver, creds)
 
 	if err != nil {
-		panic(err)
+		log.Panic(err)
 	}
 
 	db.DB().SetMaxIdleConns(10)
@@ -37,7 +38,7 @@ func InitTestDb() * gorm.DB {
 
 	testDb, err := gorm.Open(driver, testDbPath)
 	if err != nil {
-		panic(err)
+		log.Panic(err)
 	}
 
 	testDb.DB().SetMaxIdleConns(3)
