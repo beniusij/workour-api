@@ -3,8 +3,8 @@ package authentication
 import (
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
-	"os"
 	"time"
+	c "workour-api/config"
 	"workour-api/users"
 )
 
@@ -19,8 +19,6 @@ type AuthToken struct {
 	Token string
 }
 
-var jwtSecret = []byte(os.Getenv("JWT_SECRET"))
-
 func (t AuthToken)GenerateToken(u users.User) (string, error) {
 	claims := jwt.MapClaims{
 		"id": u.ID,
@@ -32,7 +30,7 @@ func (t AuthToken)GenerateToken(u users.User) (string, error) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	var err error
-	t.Token, err = token.SignedString(jwtSecret)
+	t.Token, err = token.SignedString(c.Configurations.JWTSecret)
 	if err != nil {
 		return "", err
 	}
@@ -53,7 +51,7 @@ func (t *AuthToken)ValidateToken() bool {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 
-		return jwtSecret, nil
+		return c.Configurations.JWTSecret, nil
 	})
 	if err != nil {
 		return false
@@ -67,7 +65,7 @@ func (t *AuthToken)ValidateToken() bool {
 func (t *AuthToken)DecodeToken() (map[string]interface{}, error) {
 	// Get unsigned Token
 	token, err := jwt.Parse(t.Token, func(token *jwt.Token) (interface{}, error) {
-		return jwtSecret, nil
+		return c.Configurations.JWTSecret, nil
 	})
 	if err != nil {
 		return nil, err
@@ -86,7 +84,7 @@ func (t *AuthToken)DecodeToken() (map[string]interface{}, error) {
 func (t *AuthToken)RefreshToken() (string, error) {
 	// extract claims from signed Token
 	token, err := jwt.Parse(t.Token, func(token *jwt.Token) (i interface{}, e error) {
-		return jwtSecret, nil
+		return c.Configurations.JWTSecret, nil
 	})
 	if err != nil {
 		return "", err
@@ -98,7 +96,7 @@ func (t *AuthToken)RefreshToken() (string, error) {
 
 	// generate Token with updated claims
 	refreshedToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	t.Token, err = refreshedToken.SignedString(jwtSecret)
+	t.Token, err = refreshedToken.SignedString(c.Configurations.JWTSecret)
 	if err != nil {
 		return "", err
 	}

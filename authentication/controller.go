@@ -7,7 +7,6 @@ import (
 	"github.com/gorilla/sessions"
 	"log"
 	"net/http"
-	"os"
 	"workour-api/config"
 	"workour-api/roles"
 	"workour-api/users"
@@ -15,9 +14,7 @@ import (
 
 const CookieName = "WRKSESSID"
 
-var env = os.Getenv("APP_ENV")
 var secureFlag = true
-var domain = os.Getenv("DOMAIN")
 
 type Controller struct {}
 type Creds 		struct {
@@ -173,14 +170,13 @@ func interruptAuthentication(c *gin.Context, err error) {
 
 // Sets options for cookie which is later passed to session
 func setCookieOptions() *sessions.Options {
-	if env == "development" {
+	if config.Configurations.Environment == "development" {
 		secureFlag = false
-		domain = "localhost"
 	}
 
 	return &sessions.Options{
 		Path:     "/",
-		Domain:   domain,
+		Domain:   config.Configurations.Domain,
 		MaxAge:   3600 * 24,
 		Secure:   false,
 		HttpOnly: true,
