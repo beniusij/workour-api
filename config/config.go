@@ -45,8 +45,8 @@ func New() {
 	Configurations = &Config{
 		Port: 			getEnv("PORT", "8080"),
 		JWTSecret:		getEnvAsByte("JWT_SECRET", "ThisIsTokenSecret"),
-		CorsOrigins:	getEnvAsSlice("CORS_ORIGIN", []string{"http://localhost:3000"}, ","),
-		Environment:	getEnv("APP_ENV", "development"),
+		CorsOrigins:	getEnvAsSlice("CORS_ORIGIN", []string{"*"}, ","),
+		Environment:	getEnv("APP_ENV", "production"),
 		Domain:			getEnv("DOMAIN", "localhost"),
 	}
 }
