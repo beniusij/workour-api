@@ -23,7 +23,7 @@ var allowHeaders = []string{
 }
 
 func SetupRoutes(router *gin.Engine) {
-	log.Println(c.Configurations.CorsOrigins)
+	log.Printf("CORS_ORIGIN=%v",c.Configurations.CorsOrigins)
 	router.Use(cors.New(cors.Config{
 		AllowOrigins:           c.Configurations.CorsOrigins,
 		AllowMethods:           []string{"POST", "PUT", "GET", "OPTIONS"},
