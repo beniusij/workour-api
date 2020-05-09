@@ -5,7 +5,6 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/graphql-go/graphql"
-	"log"
 	"time"
 	auth "workour-api/authentication"
 	c "workour-api/config"
@@ -23,7 +22,6 @@ var allowHeaders = []string{
 }
 
 func SetupRoutes(router *gin.Engine) {
-	log.Printf("CORS_ORIGIN=%v",c.Configurations.CorsOrigins)
 	router.Use(cors.New(cors.Config{
 		AllowOrigins:           c.Configurations.CorsOrigins,
 		AllowMethods:           []string{"POST", "PUT", "GET", "OPTIONS"},
