@@ -32,7 +32,7 @@ type DatabasesConfig struct {
 type Config struct {
 	TestDatabase 	DatabaseConfig
 	Port			string
-	JWTSecret		string
+	JWTSecret		[]byte
 	CorsOrigins		[]string
 	Environment		string
 	Domain			string
@@ -44,7 +44,7 @@ var Configurations *Config
 func New() {
 	Configurations = &Config{
 		Port: 			getEnv("PORT", "8080"),
-		JWTSecret:		getEnv("JWT_SECRET", "ThisIsTokenSecret"),
+		JWTSecret:		getEnvAsByte("JWT_SECRET", "ThisIsTokenSecret"),
 		CorsOrigins:	getEnvAsSlice("CORS_ORIGIN", []string{"http://localhost:3000"}, ","),
 		Environment:	getEnv("APP_ENV", "development"),
 		Domain:			getEnv("DOMAIN", "localhost"),
@@ -93,4 +93,15 @@ func getEnvAsSlice(name string, defaultVal []string, sep string) []string {
 	val := strings.Split(valStr, sep)
 
 	return val
+}
+
+// Helper to read an env variable and convert it to []byte or return a default value
+func getEnvAsByte(name string, defaultValue string) []byte {
+	valStr := getEnv(name, "")
+
+	if valStr == "" {
+		return []byte(defaultValue)
+	}
+
+	return []byte(valStr)
 }

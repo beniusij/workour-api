@@ -348,6 +348,7 @@ func hasRoute(r *gin.Engine, path string) bool {
 func setUp(t *testing.T) (a *assert.Assertions, r *gin.Engine) {
 	addTestFixtures(5)
 	config.SetupSessionStorage()
+	config.New()
 
 	a = assert.New(t)
 	r = gin.New()
