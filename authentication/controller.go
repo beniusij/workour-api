@@ -178,7 +178,7 @@ func setCookieOptions() *sessions.Options {
 		Path:     "/",
 		Domain:   config.Configurations.Domain,
 		MaxAge:   3600 * 24,
-		Secure:   false,
+		Secure:   secureFlag,
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,
 	}
