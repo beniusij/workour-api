@@ -62,7 +62,7 @@ func NewRedisConfig() *RedisConfig {
 
 func NewDatabaseConfig() *DatabaseConfig {
 	return &DatabaseConfig{
-		Host:     getEnv("DATABASE_HOST", "workour_db"),
+		Host:     getEnv("DATABASE_HOST", "localhost"),
 		Port:     getEnv("DATABASE_PORT", "5432"),
 		User:     getEnv("DATABASE_USER", "root"),
 		Password: getEnv("DATABASE_PSW", "admin"),

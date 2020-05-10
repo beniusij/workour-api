@@ -11,3 +11,4 @@ Makefile
 Procfile
 docker-compose.yml
 tmp
+./bin

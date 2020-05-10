@@ -25,3 +25,7 @@ stop:
 
 test:
 	go test ./tests
+
+pre-deploy-test:
+	go build -o bin/workour-api -v .
+	heroku local

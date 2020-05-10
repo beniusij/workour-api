@@ -13,6 +13,7 @@ docker
 
 # Built executable
 /workour-api
+bin/
 
 # Tests-related products
 gorm_test.db
